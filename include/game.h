@@ -18,6 +18,7 @@ public:
   using Window::Window;
   Game(int width, int height, int startx, int starty);
   Game(int width, int height);
+	void make_level(int num_level);
 
   void spawn_bullet(int x, int y, int vx, int vy);
   void loop();

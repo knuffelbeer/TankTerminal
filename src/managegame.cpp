@@ -47,10 +47,13 @@ void ManageGame::run() {
     usleep(999999);
   }
   bool run = true;
+  int l{};
   while (run) {
     clear();
     nodelay(stdscr, TRUE);
     auto g = Game(40, 20);
+    g.make_level(l);
+    l = (l + 1) % 3;
     g.loop();
     nodelay(stdscr, FALSE);
     attron(COLOR_PAIR(3));

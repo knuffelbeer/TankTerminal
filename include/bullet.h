@@ -29,11 +29,18 @@ public:
   void move(const std::vector<Wall> &walls) {
     for (auto w : walls) {
       if (w.direction == 'H') {
+        if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
+          vx = -vx;
+        }
+
         if (y == w.loc && w.start <= x && x <= w.stop) {
           vy = -vy;
         }
       }
       if (w.direction == 'V') {
+        if (vx == 0 && w.loc == x && (w.start == y || w.stop == y)) {
+          vy = -vy;
+        }
         if (x == w.loc && w.start <= y && y <= w.stop) {
           vx = -vx;
         }
