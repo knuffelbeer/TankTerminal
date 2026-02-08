@@ -16,4 +16,5 @@ Start the game:
 `./TankTerminal`
 
 Dependencies:
-+ncurses
+
+ncurses
