@@ -97,21 +97,19 @@ void Tank::j() {
 
 void Tank::straight_horizontal() {
   for (int i = -2; i < 3; i++) {
-    mvwaddch(my_win, y, x + i, ACS_PI);
-    mvwaddch(my_win, y + 1, x + i, ACS_PI);
+    draw_single_point(y, x + i);
+    draw_single_point(y + 1, x + i);
   }
 }
 
 void Tank::straight_vertical() {
   for (int i = -1; i < 3; i++) {
-    mvwaddch(my_win, y + i, x, ACS_PI);
-    mvwaddch(my_win, y + i, x + 1, ACS_PI);
+    draw_single_point(y + i, x);
+    draw_single_point(y + i, x + 1);
   }
 }
 
-void Tank::draw_single_point(int other_x, int other_y) {
-  mvwaddch(my_win, other_y, other_x, ACS_PI);
-}
+void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 
 template <typename F, typename... Args>
 void Tank::apply(F &&fun, Args &&...extra) {

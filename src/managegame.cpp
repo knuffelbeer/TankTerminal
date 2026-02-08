@@ -18,28 +18,28 @@ void ManageGame::run() {
       welcome.display_text("Welcome to TankTerminal", 4, 4);
       welcome.color_off(3);
       welcome.add_border();
-      welcome.color_on(1);
+      welcome.color_on(5);
       welcome.display_text("Player One", 4, 7);
       if (!q) {
         welcome.display_text("press q", 4, 11);
-        welcome.color_off(1);
+        welcome.color_off(5);
       }
       welcome.display_text("q  w", 5, 8);
       welcome.display_text("asd", 7, 9);
       if (q)
-        welcome.color_off(1);
+        welcome.color_off(5);
 
-      welcome.color_on(2);
+      welcome.color_on(6);
       welcome.display_text("Player two", 15, 7);
       if (!space) {
         welcome.display_text("press SPACE", 15, 11);
-        welcome.color_off(2);
+        welcome.color_off(6);
       }
 
       welcome.display_text("SPACE  ^", 16, 8);
       welcome.display_text("< v >", 21, 9);
       if (space)
-        welcome.color_off(1);
+        welcome.color_off(5);
       welcome.refresh();
       if (!(q && space))
         ch = getch();
@@ -80,10 +80,12 @@ ManageGame::ManageGame() {
   curs_set(0);
   keypad(stdscr, TRUE);
   start_color();
-  init_pair(1, COLOR_RED, COLOR_BLACK);
-  init_pair(2, COLOR_BLUE, COLOR_BLACK);
+  init_pair(1, COLOR_BLACK, COLOR_RED);
+  init_pair(2, COLOR_BLACK, COLOR_BLUE);
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
   init_pair(4, COLOR_GREEN, COLOR_YELLOW);
+  init_pair(5, COLOR_RED, COLOR_BLACK);
+  init_pair(6, COLOR_BLUE, COLOR_BLACK);
 }
 
 ManageGame::~ManageGame() { endwin(); /* End curses mode		  */ }

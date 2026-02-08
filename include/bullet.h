@@ -50,7 +50,7 @@ public:
     y += vy;
     t += 1;
   }
-  void draw() { mvwaddch(win, y, x, ACS_BULLET); }
+  void draw() { mvwaddch(win, y, x, ACS_BLOCK); }
 
 private:
   int vx;
