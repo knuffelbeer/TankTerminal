@@ -1,4 +1,4 @@
-#include "managegame.h"
+#include "../include/managegame.h"
 
 void ManageGame::run() {
   {

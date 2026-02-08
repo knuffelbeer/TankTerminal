@@ -12,7 +12,7 @@ if(Curses_FOUND AND NOT TARGET Curses::Curses)
   )
 endif()
 
-add_executable(TankTerminal app.cpp tank.cpp game.cpp managegame.cpp)
+add_executable(TankTerminal src/app.cpp src/tank.cpp src/game.cpp src/managegame.cpp)
 target_link_libraries(TankTerminal PRIVATE Curses::Curses)
 target_compile_options(TankTerminal PRIVATE
 )

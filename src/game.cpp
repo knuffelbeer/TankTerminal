@@ -1,4 +1,4 @@
-#include "game.h"
+#include "../include/game.h"
 
 Game::Game(int width, int height, int startx, int starty)
     : Window(width, height, startx, starty) {

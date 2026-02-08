@@ -1,5 +1,5 @@
-#include "tank.h"
-#include "game.h"
+#include "../include/tank.h"
+#include "../include/game.h"
 #include <utility>
 #include <vector>
 
