@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15...4.2)
-project(nkutj)
+project(TankTerminal)
 set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses)
 if(Curses_FOUND AND NOT TARGET Curses::Curses)
