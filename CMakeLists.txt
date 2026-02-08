@@ -12,17 +12,7 @@ if(Curses_FOUND AND NOT TARGET Curses::Curses)
   )
 endif()
 
-add_executable(app app.cpp tank.cpp game.cpp managegame.cpp)
-target_link_libraries(app PRIVATE Curses::Curses)
-target_compile_options(app PRIVATE
+add_executable(TankTerminal app.cpp tank.cpp game.cpp managegame.cpp)
+target_link_libraries(TankTerminal PRIVATE Curses::Curses)
+target_compile_options(TankTerminal PRIVATE
 )
-
-
-	# -fsanitize=address,undefined
-	# -fno-omit-frame-pointer
-	# -g
-# target_link_options(app PRIVATE
-#     -fsanitize=address,undefined
-# )
-
-
