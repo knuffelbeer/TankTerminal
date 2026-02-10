@@ -17,136 +17,38 @@ void Game::build() {
 void Game::make_level(int num_level) {
   switch (num_level) {
   case 0: {
-    Wall h1{.my_win = my_win,
-            .direction = 'H',
-            .loc = 0, // y_location
-            .start = 0,
-            .stop = width};
-    Wall h2{.my_win = my_win,
-            .direction = 'H',
-            .loc = height - 1, // y_location
-            .start = 0,
-            .stop = width};
-    Wall h3{.my_win = my_win,
-            .direction = 'V',
-            .loc = 0, // y_location
-            .start = 0,
-            .stop = height};
-    Wall h4{.my_win = my_win,
-            .direction = 'V',
-            .loc = width - 1, // y_location
-            .start = 0,
-            .stop = height};
-    Wall h5{.my_win = my_win,
-            .direction = 'V',
-            .loc = width / 2, // y_location
-            .start = 0,
-            .stop = height / 2};
-    Wall h6{.my_win = my_win,
-            .direction = 'H',
-            .loc = height / 2 + 3,
-            .start = 5,
-            .stop = width / 3};
-    Wall h7{.my_win = my_win,
-            .direction = 'H',
-            .loc = 5, // y_location
-            .start = width - 10,
-            .stop = width};
-    Wall h8{.my_win = my_win,
-            .direction = 'H',
-            .loc = height - 5, // y_location
-            .start = width - 10,
-            .stop = width};
-    walls = {h1, h2, h3, h4, h5, h6, h7, h8};
+    walls = {Wall{my_win, 'H', 0, 0, width},
+             Wall{my_win, 'H', height - 1, 0, width},
+             Wall{my_win, 'V', 0, 0, height},
+             Wall{my_win, 'V', width - 1, 0, height},
+             Wall{my_win, 'V', width / 2, 0, height / 2},
+             Wall{my_win, 'H', height / 2 + 3, 5, width / 3},
+             Wall{my_win, 'H', 5, width - 10, width},
+             Wall{my_win, 'H', height - 5, width - 10, width}};
   } break;
   case 1: {
-    Wall h1{.my_win = my_win,
-            .direction = 'H',
-            .loc = 0, // y_location
-            .start = 0,
-            .stop = width};
-    Wall h2{.my_win = my_win,
-            .direction = 'H',
-            .loc = height - 1, // y_location
-            .start = 0,
-            .stop = width};
-    Wall h3{.my_win = my_win,
-            .direction = 'V',
-            .loc = 0, // y_location
-            .start = 0,
-            .stop = height};
-    Wall h4{.my_win = my_win,
-            .direction = 'V',
-            .loc = width - 1, // y_location
-            .start = 0,
-            .stop = height};
-    Wall h5{.my_win = my_win,
-            .direction = 'V',
-            .loc = width / 2, // y_location
-            .start = 0,
-            .stop = height / 2};
-    Wall h6{.my_win = my_win,
-            .direction = 'V',
-            .loc = height / 2 + 3,
-            .start = 5,
-            .stop = width / 3};
-    Wall h7{.my_win = my_win,
-            .direction = 'H',
-            .loc = 5, // y_location
-            .start = width - 10,
-            .stop = width};
-    Wall h8{.my_win = my_win,
-            .direction = 'V',
-            .loc = width - 10, // y_location
-            .start = height - 10,
-            .stop = height};
-    walls = {h1, h2, h3, h4, h5, h6, h7, h8};
+    walls = {Wall{my_win, 'H', 0, 0, width},
+             Wall{my_win, 'H', height - 1, 0, width},
+             Wall{my_win, 'V', 0, 0, height},
+             Wall{my_win, 'V', width - 1, 0, height},
+             Wall{my_win, 'V', width / 2, 0, height / 2},
+             Wall{my_win, 'V', height / 2 + 3, 5, width / 3},
+             Wall{my_win, 'H', 5, width - 10, width},
+             Wall{my_win, 'V', width - 10, height - 10, height}};
   } break;
   case 2: {
-    Wall h1{.my_win = my_win,
-            .direction = 'H',
-            .loc = 0, // y_location
-            .start = 0,
-            .stop = width - 5};
-    Wall h2{.my_win = my_win,
-            .direction = 'H',
-            .loc = height - 1, // y_location
-            .start = 0,
-            .stop = width - 5};
-    Wall h3{.my_win = my_win,
-            .direction = 'V',
-            .loc = 0, // y_location
-            .start = 0,
-            .stop = height};
-    Wall h4{.my_win = my_win,
-            .direction = 'V',
-            .loc = (width - 5) - 1, // y_location
-            .start = 0,
-            .stop = height};
-    Wall h5{.my_win = my_win,
-            .direction = 'V',
-            .loc = 10, // y_location
-            .start = height - 5,
-            .stop = height};
-    Wall h6{.my_win = my_win,
-            .direction = 'V',
-            .loc = 20,
-            .start = 5,
-            .stop = height - 10};
-    Wall h7{.my_win = my_win,
-            .direction = 'H',
-            .loc = 5, // y_location
-            .start = 10,
-            .stop = 20};
-    Wall h8{.my_win = my_win,
-            .direction = 'V',
-            .loc = width - 15, // y_location
-            .start = height - 10,
-            .stop = height};
-    walls = {h1, h2, h3, h4, h5, h6, h7, h8};
+    walls = {Wall{my_win, 'H', 0, 0, width - 5},
+             Wall{my_win, 'H', height - 1, 0, width - 5},
+             Wall{my_win, 'V', 0, 0, height},
+             Wall{my_win, 'V', (width - 5) - 1, 0, height},
+             Wall{my_win, 'V', 10, height - 5, height},
+             Wall{my_win, 'V', 20, 5, height - 10},
+             Wall{my_win, 'H', 5, 10, 20},
+             Wall{my_win, 'V', width - 15, height - 10, height}};
   } break;
   }
 }
+
 void Game::update_bullets() {
   for (int i = 0; i < bullets.size();) {
     bullets[i].move(walls);

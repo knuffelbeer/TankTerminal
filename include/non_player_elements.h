@@ -4,11 +4,11 @@
 #include <vector>
 
 struct Wall {
+  WINDOW *my_win;
   char direction;
+  int loc;
   int start;
   int stop;
-  int loc;
-  WINDOW *my_win;
   void draw();
 };
 
