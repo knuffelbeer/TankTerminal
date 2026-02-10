@@ -6,14 +6,27 @@ class Game;
 
 class Tank {
 private:
-  static constexpr int D_HORIZONTAL_RIGHT = 0;
-  static constexpr int D_RIGHT_UP = 1;
-  static constexpr int D_VERTICAL_UP = 2;
-  static constexpr int D_LEFT_UP = 3;
-  static constexpr int D_HORIZONTAL_LEFT = 4;
-  static constexpr int D_LEFT_DOWN = 5;
-  static constexpr int D_VERTICAL_DOWN = 6;
-  static constexpr int D_RIGHT_DOWN = 7;
+  inline static constexpr int MOVE_K[8][2]{
+      {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
+  };
+  inline static constexpr int MOVE_Q[8][4] = {
+      {3, 0, 1, 0},    {3, -2, 1, -1}, {0, -3, 0, -1}, {-3, -2, -1, -1},
+      {-3, 0, -1, -0}, {-3, 2, -1, 1}, {0, 3, 0, 1},   {3, 3, 1, 1}};
+  inline static constexpr int MOVE_J[8][2] = {
+      {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}};
+
+  enum Direction {
+
+    D_HORIZONTAL_RIGHT,
+    D_RIGHT_UP,
+    D_VERTICAL_UP,
+    D_LEFT_UP,
+    D_HORIZONTAL_LEFT,
+    D_LEFT_DOWN,
+    D_VERTICAL_DOWN,
+    D_RIGHT_DOWN,
+
+  };
   int x{}, y{};
   int image{};
   int orientation{};

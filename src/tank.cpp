@@ -17,6 +17,7 @@ void Tank::l() {
   image = image % 4;
   orientation = orientation % 8;
 }
+
 void Tank::h() {
   if (image > 0)
     image -= 1;
@@ -29,69 +30,15 @@ void Tank::h() {
 }
 
 void Tank::k() {
-  switch (orientation) {
-  case D_HORIZONTAL_RIGHT:
-    x += 1;
-    break;
-  case D_RIGHT_UP:
-    x += 1;
-    y -= 1;
-    break;
-  case D_VERTICAL_UP:
-    y -= 1;
-    break;
-  case D_LEFT_UP:
-    x -= 1;
-    y -= 1;
-    break;
-  case D_HORIZONTAL_LEFT:
-    x -= 1;
-    break;
-  case D_LEFT_DOWN:
-    x -= 1;
-    y += 1;
-    break;
-  case D_VERTICAL_DOWN:
-    y += 1;
-    break;
-  case D_RIGHT_DOWN:
-    x += 1;
-    y += 1;
-    break;
-  }
+  auto [move_x, move_y] = MOVE_K[orientation];
+  x += move_x;
+  y += move_y;
 }
 
 void Tank::j() {
-  switch (orientation) {
-  case D_HORIZONTAL_RIGHT:
-    x -= 1;
-    break;
-  case D_RIGHT_UP:
-    x -= 1;
-    y += 1;
-    break;
-  case D_VERTICAL_UP:
-    y += 1;
-    break;
-  case D_LEFT_UP:
-    x += 1;
-    y += 1;
-    break;
-  case D_HORIZONTAL_LEFT:
-    x += 1;
-    break;
-  case D_LEFT_DOWN:
-    x += 1;
-    y -= 1;
-    break;
-  case D_VERTICAL_DOWN:
-    y -= 1;
-    break;
-  case D_RIGHT_DOWN:
-    x -= 1;
-    y -= 1;
-    break;
-  }
+  auto [dx, dy] = MOVE_J[orientation];
+  x += dx;
+  y += dy;
 }
 
 void Tank::straight_horizontal() {
@@ -110,8 +57,7 @@ void Tank::straight_vertical() {
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 
-template <typename F>
-void Tank::apply(F &&fun) {
+template <typename F> void Tank::apply(F &&fun) {
   auto amt_rows_tank = {0, 1};
   switch (image) {
   case D_HORIZONTAL_RIGHT:
@@ -224,32 +170,8 @@ void Tank::request_shot(Game *game, int x, int y, int vx, int vy) {
 }
 
 void Tank::q(Game *game) {
-  switch (orientation) {
-  case D_RIGHT_DOWN:
-    request_shot(game, x + 3, y + 3, 1, 1);
-    break;
-  case D_HORIZONTAL_RIGHT:
-    request_shot(game, x + 3, y, 1, 0);
-    break;
-  case D_RIGHT_UP:
-    request_shot(game, x + 3, y - 2, 1, -1);
-    break;
-  case D_VERTICAL_UP:
-    request_shot(game, x, y - 3, 0, -1);
-    break;
-  case D_LEFT_UP:
-    request_shot(game, x - 3, y - 2, -1, -1);
-    break;
-  case D_HORIZONTAL_LEFT:
-    request_shot(game, x - 3, y, -1, 0);
-    break;
-  case D_LEFT_DOWN:
-    request_shot(game, x - 3, y + 2, -1, 1);
-    break;
-  case D_VERTICAL_DOWN:
-    request_shot(game, x, y + 3, 0, 1);
-    break;
-  }
+  auto [dx, dy, vx, vy] = move_q[orientation];
+  request_shot(game, x + dx, y + dy, vx, vy);
 }
 
 void Tank::update(Game *game, int ch, bool &run) {
