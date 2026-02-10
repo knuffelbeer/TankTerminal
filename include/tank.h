@@ -1,11 +1,14 @@
 #pragma once
 #include "ncurses.h"
 #include "non_player_elements.h"
-
+#include <map>
 class Game;
 
 class Tank {
+
 private:
+
+static const std::map<int, std::vector<std::pair<int,int>>> image_offsets ;
   inline static constexpr int MOVE_K[8][2]{
       {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
   };
@@ -47,7 +50,7 @@ public:
   void k();
   void j();
 
-  template <typename F> void apply(F &&fun);
+  template <typename F> void for_all_points(F &&fun);
   void draw_single_point(int other_x, int other_y);
   void q(Game *game);
   void request_shot(Game *game, int x, int y, int vx, int vy);
@@ -58,3 +61,6 @@ public:
   void straight_vertical();
   void move(int ch, Game *game);
 };
+
+
+

@@ -57,80 +57,17 @@ void Tank::straight_vertical() {
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 
-template <typename F> void Tank::apply(F &&fun) {
+template <typename F> void Tank::for_all_points(F &&fun) {
   auto amt_rows_tank = {0, 1};
-  switch (image) {
-  case D_HORIZONTAL_RIGHT:
-    for (int j : amt_rows_tank) {
-      for (int i = -2; i < 3; i++) {
-        fun(x + i, y + j);
-      }
-    }
-    break;
-  case D_RIGHT_UP:
-    for (int j : amt_rows_tank) {
-      fun(x - 2, y + j + 1);
-      for (int i = -1; i < 2; i++) {
-        fun(x + i, y + j);
-      }
-      fun(x + 2, y + j - 1);
-    }
-    break;
-  case D_VERTICAL_UP:
-    for (int j : amt_rows_tank) {
-      for (int i = -1; i < 3; i++) {
-        fun(x + j, y + i);
-      }
-    }
-    break;
-  case D_LEFT_UP:
-    for (int j : amt_rows_tank) {
-      fun(x - 2, y - j);
-      for (int i = -1; i < 2; i++) {
-        fun(x + i, y + j);
-      }
-      fun(x + 2, y + 1 + j);
-    }
-    break;
-  case D_HORIZONTAL_LEFT:
-    for (int j : amt_rows_tank) {
-      for (int i = -2; i < 3; i++) {
-        fun(x + i, y + j);
-        break;
-      }
-    }
-  case D_LEFT_DOWN:
-    for (int j : amt_rows_tank) {
-      fun(x - 2, y + 1 + j);
-      for (int i = -1; i < 2; i++) {
-        fun(x + i, y + j);
-      }
-      fun(x + 2, y - j);
-      break;
-    }
-  case D_VERTICAL_DOWN:
-    for (int j : amt_rows_tank) {
-      for (int i = -1; i < 3; i++) {
-        fun(x + j, y + i);
-      }
-    }
-    break;
-  case D_RIGHT_DOWN:
-    for (int j : amt_rows_tank) {
-      fun(x - 2, y - j);
-      for (int i = -1; i < 2; i++) {
-        fun(x + i, y + j);
-      }
-      fun(x + 2, y + 1 + j);
-    }
-    break;
+  for (auto [dx, dy] : image_offsets.at(image)) {
+    fun(x + dx, y + dy);
   }
 }
 
 bool Tank::check_hit(const std::vector<Bullet> &bullets) {
   bool hit = false;
   for (const Bullet &b : bullets) {
-    apply([b, &hit](int x, int y) {
+    for_all_points([b, &hit](int x, int y) {
       if (x == b.x && y == b.y)
         hit = true;
     });
@@ -142,13 +79,13 @@ bool Tank::check_hit(const std::vector<Bullet> &bullets) {
 
 void Tank::draw() {
   wattron(my_win, COLOR_PAIR(color_pair));
-  apply([this](int x, int y) { draw_single_point(x, y); });
+  for_all_points([this](int x, int y) { draw_single_point(x, y); });
   wattroff(my_win, COLOR_PAIR(color_pair));
 }
 
 bool Tank::check_move(const std::vector<Wall> &walls) {
   bool valid = true;
-  apply([&walls, &valid](int x, int y) {
+  for_all_points([&walls, &valid](int x, int y) {
     for (const Wall &wall : walls) {
       switch (wall.direction) {
       case 'H':
@@ -213,3 +150,75 @@ void Tank::move(int ch, Game *game) {
   } else if (ch == shoot)
     q(game);
 }
+
+const std::map<int, std::vector<std::pair<int, int>>> Tank::image_offsets = {
+    {D_HORIZONTAL_RIGHT,
+     {{-2, 0},
+      {-1, 0},
+      {0, 0},
+      {1, 0},
+      {2, 0},
+      {-2, 1},
+      {-1, 1},
+      {0, 1},
+      {1, 1},
+      {2, 1}}},
+    {D_RIGHT_UP,
+     {{-2, 1},
+      {-1, 0},
+      {0, 0},
+      {1, 0},
+      {2, -1},
+      {-2, 2},
+      {-1, 1},
+      {0, 1},
+      {1, 1},
+      {2, 0}}},
+    {D_VERTICAL_UP,
+     {{0, -1}, {0, 0}, {0, 1}, {0, 2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}}},
+    {D_LEFT_UP,
+     {{-2, -0},
+      {-1, 0},
+      {0, 0},
+      {1, 0},
+      {2, 1},
+      {-2, -1},
+      {-1, 1},
+      {0, 1},
+      {1, 1},
+      {2, 2}}},
+    {D_HORIZONTAL_LEFT,
+     {{-2, 0},
+      {-1, 0},
+      {0, 0},
+      {1, 0},
+      {2, 0},
+      {-2, 1},
+      {-1, 1},
+      {0, 1},
+      {1, 1},
+      {2, 1}}},
+    {D_LEFT_DOWN,
+     {{-2, 1},
+      {-1, 0},
+      {0, 0},
+      {1, 0},
+      {2, -0},
+      {-2, 2},
+      {-1, 1},
+      {0, 1},
+      {1, 1},
+      {2, -1}}},
+    {D_VERTICAL_DOWN,
+     {{0, -1}, {0, 0}, {0, 1}, {0, 2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}}},
+    {D_RIGHT_DOWN,
+     {{-2, -0},
+      {-1, 0},
+      {0, 0},
+      {1, 0},
+      {2, 1},
+      {-2, -1},
+      {-1, 1},
+      {0, 1},
+      {1, 1},
+      {2, 2}}}};
