@@ -1,6 +1,6 @@
 #include "../include/non_player_elements.h"
 
-void Wall::draw() {
+void Wall::draw(WINDOW* my_win) {
   if (direction == 'H')
     mvwhline(my_win, loc, start, '-', stop - start);
   if (direction == 'V')

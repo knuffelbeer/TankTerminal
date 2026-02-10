@@ -4,6 +4,7 @@ Game::Game(int width, int height, int startx, int starty)
     : Window(width, height, startx, starty) {
   build();
 }
+
 Game::Game(int width, int height) : Window(width, height) { build(); }
 
 void Game::build() {
@@ -17,34 +18,34 @@ void Game::build() {
 void Game::make_level(int num_level) {
   switch (num_level) {
   case 0: {
-    walls = {Wall{my_win, 'H', 0, 0, width},
-             Wall{my_win, 'H', height - 1, 0, width},
-             Wall{my_win, 'V', 0, 0, height},
-             Wall{my_win, 'V', width - 1, 0, height},
-             Wall{my_win, 'V', width / 2, 0, height / 2},
-             Wall{my_win, 'H', height / 2 + 3, 5, width / 3},
-             Wall{my_win, 'H', 5, width - 10, width},
-             Wall{my_win, 'H', height - 5, width - 10, width}};
+    walls = {{'H', 0, 0, width},
+             {'H', height - 1, 0, width},
+             {'V', 0, 0, height},
+             {'V', width - 1, 0, height},
+             {'V', width / 2, 0, height / 2},
+             {'H', height / 2 + 3, 5, width / 3},
+             {'H', 5, width - 10, width},
+             {'H', height - 5, width - 10, width}};
   } break;
   case 1: {
-    walls = {Wall{my_win, 'H', 0, 0, width},
-             Wall{my_win, 'H', height - 1, 0, width},
-             Wall{my_win, 'V', 0, 0, height},
-             Wall{my_win, 'V', width - 1, 0, height},
-             Wall{my_win, 'V', width / 2, 0, height / 2},
-             Wall{my_win, 'V', height / 2 + 3, 5, width / 3},
-             Wall{my_win, 'H', 5, width - 10, width},
-             Wall{my_win, 'V', width - 10, height - 10, height}};
+    walls = {{'H', 0, 0, width},
+             {'H', height - 1, 0, width},
+             {'V', 0, 0, height},
+             {'V', width - 1, 0, height},
+             {'V', width / 2, 0, height / 2},
+             {'V', height / 2 + 3, 5, width / 3},
+             {'H', 5, width - 10, width},
+             {'V', width - 10, height - 10, height}};
   } break;
   case 2: {
-    walls = {Wall{my_win, 'H', 0, 0, width - 5},
-             Wall{my_win, 'H', height - 1, 0, width - 5},
-             Wall{my_win, 'V', 0, 0, height},
-             Wall{my_win, 'V', (width - 5) - 1, 0, height},
-             Wall{my_win, 'V', 10, height - 5, height},
-             Wall{my_win, 'V', 20, 5, height - 10},
-             Wall{my_win, 'H', 5, 10, 20},
-             Wall{my_win, 'V', width - 15, height - 10, height}};
+    walls = {{'H', 0, 0, width - 5},
+             {'H', height - 1, 0, width - 5},
+             {'V', 0, 0, height},
+             {'V', (width - 5) - 1, 0, height},
+             {'V', 10, height - 5, height},
+             {'V', 20, 5, height - 10},
+             {'H', 5, 10, 20},
+             {'V', width - 15, height - 10, height}};
   } break;
   }
 }
@@ -71,10 +72,9 @@ void Game::loop() {
     ch = getch();
     wclear(my_win);
     for (Wall w : walls) {
-      w.draw();
+      w.draw(my_win);
     }
     update_bullets();
-
     for (Tank &t : tanks) {
       t.update(this, ch, run);
     }
