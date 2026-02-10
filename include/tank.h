@@ -1,6 +1,6 @@
 #pragma once
-#include "non_player_elements.h"
 #include "ncurses.h"
+#include "non_player_elements.h"
 
 class Game;
 
@@ -34,7 +34,7 @@ public:
   void k();
   void j();
 
-  template <typename F, typename... Args> void apply(F &&fun, Args &&...extra);
+  template <typename F> void apply(F &&fun);
   void draw_single_point(int other_x, int other_y);
   void q(Game *game);
   void request_shot(Game *game, int x, int y, int vx, int vy);

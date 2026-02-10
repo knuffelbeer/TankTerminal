@@ -1,6 +1,5 @@
 #include "../include/tank.h"
 #include "../include/game.h"
-#include <utility>
 #include <vector>
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
@@ -111,72 +110,73 @@ void Tank::straight_vertical() {
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 
-template <typename F, typename... Args>
-void Tank::apply(F &&fun, Args &&...extra) {
+template <typename F>
+void Tank::apply(F &&fun) {
+  auto amt_rows_tank = {0, 1};
   switch (image) {
   case D_HORIZONTAL_RIGHT:
-    for (int i = -2; i < 3; i++) {
-      fun(x + i, y, std::forward<Args>(extra)...);
-      fun(x + i, y + 1, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      for (int i = -2; i < 3; i++) {
+        fun(x + i, y + j);
+      }
     }
     break;
   case D_RIGHT_UP:
-    fun(x - 2, y + 1, std::forward<Args>(extra)...);
-    fun(x - 2, y + 2, std::forward<Args>(extra)...);
-    for (int i = -1; i < 2; i++) {
-      fun(x + i, y, std::forward<Args>(extra)...);
-      fun(x + i, y + 1, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      fun(x - 2, y + j + 1);
+      for (int i = -1; i < 2; i++) {
+        fun(x + i, y + j);
+      }
+      fun(x + 2, y + j - 1);
     }
-    fun(x + 2, y - 1, std::forward<Args>(extra)...);
-    fun(x + 2, y, std::forward<Args>(extra)...);
     break;
   case D_VERTICAL_UP:
-    for (int i = -1; i < 3; i++) {
-      fun(x, y + i, std::forward<Args>(extra)...);
-      fun(x + 1, y + i, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      for (int i = -1; i < 3; i++) {
+        fun(x + j, y + i);
+      }
     }
     break;
   case D_LEFT_UP:
-    fun(x - 2, y - 1, std::forward<Args>(extra)...);
-    fun(x - 2, y, std::forward<Args>(extra)...);
-    for (int i = -1; i < 2; i++) {
-      fun(x + i, y, std::forward<Args>(extra)...);
-      fun(x + i, y + 1, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      fun(x - 2, y - j);
+      for (int i = -1; i < 2; i++) {
+        fun(x + i, y + j);
+      }
+      fun(x + 2, y + 1 + j);
     }
-    fun(x + 2, y + 1, std::forward<Args>(extra)...);
-    fun(x + 2, y + 2, std::forward<Args>(extra)...);
     break;
   case D_HORIZONTAL_LEFT:
-    for (int i = -2; i < 3; i++) {
-      fun(x + i, y, std::forward<Args>(extra)...);
-      fun(x + i, y + 1, std::forward<Args>(extra)...);
-      break;
+    for (int j : amt_rows_tank) {
+      for (int i = -2; i < 3; i++) {
+        fun(x + i, y + j);
+        break;
+      }
     }
   case D_LEFT_DOWN:
-    fun(x - 2, y + 1, std::forward<Args>(extra)...);
-    fun(x - 2, y + 2, std::forward<Args>(extra)...);
-    for (int i = -1; i < 2; i++) {
-      fun(x + i, y, std::forward<Args>(extra)...);
-      fun(x + i, y + 1, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      fun(x - 2, y + 1 + j);
+      for (int i = -1; i < 2; i++) {
+        fun(x + i, y + j);
+      }
+      fun(x + 2, y - j);
+      break;
     }
-    fun(x + 2, y - 1, std::forward<Args>(extra)...);
-    fun(x + 2, y, std::forward<Args>(extra)...);
-    break;
   case D_VERTICAL_DOWN:
-    for (int i = -1; i < 3; i++) {
-      fun(x, y + i, std::forward<Args>(extra)...);
-      fun(x + 1, y + i, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      for (int i = -1; i < 3; i++) {
+        fun(x + j, y + i);
+      }
     }
     break;
   case D_RIGHT_DOWN:
-    fun(x - 2, y - 1, std::forward<Args>(extra)...);
-    fun(x - 2, y, std::forward<Args>(extra)...);
-    for (int i = -1; i < 2; i++) {
-      fun(x + i, y, std::forward<Args>(extra)...);
-      fun(x + i, y + 1, std::forward<Args>(extra)...);
+    for (int j : amt_rows_tank) {
+      fun(x - 2, y - j);
+      for (int i = -1; i < 2; i++) {
+        fun(x + i, y + j);
+      }
+      fun(x + 2, y + 1 + j);
     }
-    fun(x + 2, y + 1, std::forward<Args>(extra)...);
-    fun(x + 2, y + 2, std::forward<Args>(extra)...);
     break;
   }
 }
