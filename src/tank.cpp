@@ -170,7 +170,7 @@ void Tank::request_shot(Game *game, int x, int y, int vx, int vy) {
 }
 
 void Tank::q(Game *game) {
-  auto [dx, dy, vx, vy] = move_q[orientation];
+  auto [dx, dy, vx, vy] = MOVE_Q[orientation];
   request_shot(game, x + dx, y + dy, vx, vy);
 }
 
