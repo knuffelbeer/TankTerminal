@@ -1,5 +1,5 @@
 #pragma once
-#include "bullet.h"
+#include "non_player_elements.h"
 #include "ncurses.h"
 
 class Game;

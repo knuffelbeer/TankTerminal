@@ -1,7 +1,7 @@
 #pragma once
-#include "bullet.h"
-#include "ncurses.h"
+#include "non_player_elements.h"
 #include "tank.h"
+#include "ncurses.h"
 #include "window.h"
 #include <iostream>
 #include <unistd.h>
