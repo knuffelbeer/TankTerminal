@@ -8,19 +8,54 @@ struct Wall {
   int loc;
   int start;
   int stop;
-  void draw(WINDOW* my_win);
+  void draw(WINDOW *my_win);
 };
 
-class Bullet {
+class Game;
+class Element {
 public:
+  int t{};
+  bool active = true;
   int x;
   int y;
-  int t{};
-  WINDOW *win;
-  Bullet(WINDOW *win, int x, int y, int vx, int vy);
+  int t_max;
+  virtual void move(Game *game) {}
+  virtual void draw(Game *game) {}
+  virtual void hit(Game *game) {}
 
-  void move(const std::vector<Wall> &walls);
-  void draw();
+protected:
+  Element(int x, int y);
+  Element(int x, int y, int t_max);
+};
+
+class ZapSprite : public Element {
+  int vx;
+  int vy;
+  void move(Game *game) override;
+  void draw(Game *game) override;
+  void hit(Game *game) override;
+
+public:
+  bool fire = false;
+  ZapSprite(int x, int y);
+};
+
+class ZapPixel : public Element {
+
+public:
+  ZapPixel(int x, int y);
+  void move(Game *game) override;
+  void draw(Game *game) override;
+  void hit(Game *game) override;
+};
+
+class Bullet : public Element {
+public:
+  Bullet(int x, int y, int vx, int vy);
+  Bullet(int x, int y, int vx, int vy, int t_max);
+  void move(Game *game) override;
+  void draw(Game *game) override;
+  void hit(Game *game) override;
 
 private:
   int vx;

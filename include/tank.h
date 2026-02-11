@@ -2,6 +2,7 @@
 #include "ncurses.h"
 #include "non_player_elements.h"
 #include <map>
+#include <memory>
 class Game;
 
 class Tank {
@@ -39,12 +40,13 @@ static const std::map<int, std::vector<std::pair<int,int>>> image_offsets ;
   int color_pair;
 
 public:
+	char fire_element = 'B';
   Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
        int color_pair);
   Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
        int down, int shoot, int color_pair);
   void update(Game *game, int ch, bool &run);
-  bool check_hit(const std::vector<Bullet> &bullets);
+  bool check_hit(Game*game);
   void l();
   void h();
   void k();

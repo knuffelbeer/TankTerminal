@@ -1,17 +1,19 @@
 #include "../include/non_player_elements.h"
+#include "../include/game.h"
 
-void Wall::draw(WINDOW* my_win) {
+void Wall::draw(WINDOW *my_win) {
   if (direction == 'H')
     mvwhline(my_win, loc, start, '-', stop - start);
   if (direction == 'V')
     mvwvline(my_win, start, loc, '|', stop - start);
 }
 
-Bullet::Bullet(WINDOW *win, int x, int y, int vx, int vy)
-    : win(win), x(x), y(y), vx(vx), vy(vy) {}
+Bullet::Bullet(int x, int y, int vx, int vy) : Element(x, y), vx(vx), vy(vy) {
+  t_max = 10;
+}
 
-void Bullet::move(const std::vector<Wall> &walls) {
-  for (auto w : walls) {
+void Bullet::move(Game *game) {
+  for (auto w : game->walls) {
     if (w.direction == 'H') {
       if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
         vx = -vx;
@@ -32,6 +34,35 @@ void Bullet::move(const std::vector<Wall> &walls) {
   }
   x += vx;
   y += vy;
-  t += 1;
+  t++;
+  if (t == t_max)
+    active = false;
 }
-void Bullet::draw() { mvwaddch(win, y, x, ACS_BLOCK); }
+
+void Bullet::draw(Game *game) { mvwaddch(game->my_win, y, x, ACS_BLOCK); }
+void Bullet::hit(Game *game) { game->run = false; }
+
+Element::Element(int x, int y) : x(x), y(y) {}
+Element::Element(int x, int y, int t_max) : x(x), y(y), t_max(t_max) {}
+
+ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
+
+void ZapSprite::hit(Game *game) {
+  game->tanks[game->current_player].fire_element = 'V';
+  active = false;
+}
+
+void ZapSprite::draw(Game *game) { mvwaddch(game->my_win, y, x, '+'); }
+void ZapSprite::move(Game *game) {}
+
+void ZapPixel::draw(Game *game) { mvwaddch(game->my_win, y, x, '.'); }
+
+ZapPixel::ZapPixel(int x, int y) : Element(x, y, 5) {}
+
+void ZapPixel::move(Game *game) {
+  t++;
+  if (t == t_max)
+    active = false;
+}
+
+void ZapPixel::hit(Game *game) { game->run = false; }

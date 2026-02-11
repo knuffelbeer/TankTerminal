@@ -1,5 +1,6 @@
 #include "../include/tank.h"
 #include "../include/game.h"
+#include <memory>
 #include <vector>
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
@@ -64,15 +65,17 @@ template <typename F> void Tank::for_all_points(F &&fun) {
   }
 }
 
-bool Tank::check_hit(const std::vector<Bullet> &bullets) {
+bool Tank::check_hit(Game *game) {
   bool hit = false;
-  for (const Bullet &b : bullets) {
-    for_all_points([b, &hit](int x, int y) {
-      if (x == b.x && y == b.y)
+  for (auto &b : game->elements) {
+    for_all_points([&b, &hit](int x, int y) {
+      if (x == b->x && y == b->y)
         hit = true;
     });
     if (hit)
-      break;
+		{
+      b->hit(game);
+		}
   }
   return hit;
 }
@@ -103,7 +106,43 @@ bool Tank::check_move(const std::vector<Wall> &walls) {
 }
 
 void Tank::request_shot(Game *game, int x, int y, int vx, int vy) {
-  game->spawn_bullet(x, y, vx, vy);
+  switch (fire_element) {
+  case 'B':
+    game->spawn_bullet(x, y, vx, vy);
+    break;
+  case 'V':
+    int x_temp = x;
+    int y_temp = y;
+    int vx_temp = vx;
+    int vy_temp = vy;
+    for (int i = 0; i < 20; i++) {
+      for (auto w : game->walls) {
+        if (w.direction == 'H') {
+          if (vy_temp == 0 && w.loc == y_temp &&
+              (w.start == x_temp || w.stop == x_temp)) {
+            vx_temp = -vx_temp;
+          }
+
+          if (y_temp == w.loc && w.start <= x_temp && x_temp <= w.stop) {
+            vy_temp = -vy_temp;
+          }
+        }
+        if (w.direction == 'V') {
+          if (vx_temp == 0 && w.loc == x_temp &&
+              (w.start == y_temp || w.stop == y_temp)) {
+            vy_temp = -vy_temp;
+          }
+          if (x_temp == w.loc && w.start <= y_temp && y_temp <= w.stop) {
+            vx_temp = -vx_temp;
+          }
+        }
+      }
+      x_temp += vx_temp;
+      y_temp += vy_temp;
+      game->spawn<ZapPixel>(x_temp, y_temp);
+    }
+    break;
+  }
 }
 
 void Tank::q(Game *game) {
@@ -112,9 +151,7 @@ void Tank::q(Game *game) {
 }
 
 void Tank::update(Game *game, int ch, bool &run) {
-  if (check_hit(game->bullets)) {
-    run = false;
-  }
+  check_hit(game);
   draw();
   move(ch, game);
 }

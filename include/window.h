@@ -3,7 +3,6 @@
 
 class Window {
 protected:
-  WINDOW *my_win;
   int startx, starty, width, height;
   int ch;
 
@@ -12,6 +11,7 @@ private:
   void destroy_win(WINDOW *local_win);
 
 public:
+  WINDOW *my_win;
   Window(int width, int height);
   Window(int width, int height, int startx, int starty);
   void add_border();

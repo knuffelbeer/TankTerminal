@@ -1,4 +1,6 @@
 #include "../include/game.h"
+#include <memory>
+#include <utility>
 
 Game::Game(int width, int height, int startx, int starty)
     : Window(width, height, startx, starty) {
@@ -26,6 +28,7 @@ void Game::make_level(int num_level) {
              {'H', height / 2 + 3, 5, width / 3},
              {'H', 5, width - 10, width},
              {'H', height - 5, width - 10, width}};
+		elements.push_back(std::make_unique<ZapSprite>(5,5));
   } break;
   case 1: {
     walls = {{'H', 0, 0, width},
@@ -51,11 +54,11 @@ void Game::make_level(int num_level) {
 }
 
 void Game::update_bullets() {
-  for (int i = 0; i < bullets.size();) {
-    bullets[i].move(walls);
-    bullets[i].draw();
-    if (bullets[i].t == 40) {
-      bullets.erase(bullets.begin() + i);
+  for (int i = 0; i < elements.size();) {
+    elements[i]->move(this);
+    elements[i]->draw(this);
+    if (!elements[i]->active) {
+      elements.erase(elements.begin() + i);
     } else {
       i++;
     }
@@ -63,11 +66,11 @@ void Game::update_bullets() {
 }
 
 void Game::spawn_bullet(int x, int y, int vx, int vy) {
-  bullets.push_back(Bullet(my_win, x, y, vx, vy));
+  bullets.push_back(Bullet(x, y, vx, vy));
+  spawn<Bullet>(x, y, vx, vy);
 }
 
 void Game::loop() {
-  bool run = true;
   while (run) {
     ch = getch();
     wclear(my_win);
@@ -75,8 +78,10 @@ void Game::loop() {
       w.draw(my_win);
     }
     update_bullets();
+    current_player = 0;
     for (Tank &t : tanks) {
       t.update(this, ch, run);
+      current_player++;
     }
     if (ch == 'x')
       break;
