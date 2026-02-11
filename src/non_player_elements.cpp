@@ -1,5 +1,6 @@
 #include "../include/non_player_elements.h"
 #include "../include/game.h"
+#include <ncurses.h>
 
 void Wall::draw(WINDOW *my_win) {
   if (direction == 'H')
@@ -55,7 +56,11 @@ void ZapSprite::hit(Game *game) {
 void ZapSprite::draw(Game *game) { mvwaddch(game->my_win, y, x, '+'); }
 void ZapSprite::move(Game *game) {}
 
-void ZapPixel::draw(Game *game) { mvwaddch(game->my_win, y, x, '.'); }
+void ZapPixel::draw(Game *game) {
+  wattron(game->my_win, COLOR_PAIR(3));
+  mvwaddch(game->my_win, y, x, '.');
+  wattroff(game->my_win, COLOR_PAIR(3));
+}
 
 ZapPixel::ZapPixel(int x, int y) : Element(x, y, 5) {}
 

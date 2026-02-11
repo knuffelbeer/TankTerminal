@@ -13,11 +13,10 @@ class Game : public Window {
   void build();
   void update_bullets();
 
-
 public:
-	bool run = true;
+  bool run = true;
   static constexpr int DELTA_MS = 100000;
-	int current_player = 0;
+  int current_player = 0;
   std::vector<Wall> walls;
   std::vector<Tank> tanks;
   std::vector<Bullet> bullets;
@@ -30,7 +29,9 @@ public:
 
   template <typename T, typename... Args>
   void spawn(int x, int y, Args &&...args) {
-    elements.push_back(std::make_unique<T>(x, y, std::forward<Args>(args)...));
+    auto temp = std::make_unique<T>(x, y, std::forward<Args>(args)...);
+    temp->draw(this);
+    elements.push_back(std::move(temp));
   }
   void loop();
 };

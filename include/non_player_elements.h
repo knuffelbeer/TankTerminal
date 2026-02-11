@@ -11,6 +11,11 @@ struct Wall {
   void draw(WINDOW *my_win);
 };
 
+/* for every element you can implement a move, draw and hit function.
+ * the hit function decides what happens if the Element hits a Tank
+ * move and draw get called on each iteration while the element is active.
+ * */
+
 class Game;
 class Element {
 public:
