@@ -1,6 +1,7 @@
 #pragma once
 #include "ncurses.h"
 #include "non_player_elements.h"
+#include <functional>
 #include <map>
 #include <memory>
 class Game;
@@ -8,8 +9,7 @@ class Game;
 class Tank {
 
 private:
-
-static const std::map<int, std::vector<std::pair<int,int>>> image_offsets ;
+  static const std::map<int, std::vector<std::pair<int, int>>> image_offsets;
   inline static constexpr int MOVE_K[8][2]{
       {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
   };
@@ -40,18 +40,19 @@ static const std::map<int, std::vector<std::pair<int,int>>> image_offsets ;
   int color_pair;
 
 public:
-	char fire_element = 'B';
+  char fire_element = 'B';
   Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
        int color_pair);
   Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
        int down, int shoot, int color_pair);
   void update(Game *game, int ch, bool &run);
-  bool check_hit(Game*game);
+  bool check_hit(Game *game);
   void l();
   void h();
   void k();
   void j();
 
+  std::function<void(Tank* tank,Game *game, int x, int y, int dx, int dy)> custom_shot;
   template <typename F> void for_all_points(F &&fun);
   void draw_single_point(int other_x, int other_y);
   void q(Game *game);
@@ -63,6 +64,3 @@ public:
   void straight_vertical();
   void move(int ch, Game *game);
 };
-
-
-

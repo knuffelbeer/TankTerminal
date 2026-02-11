@@ -49,7 +49,33 @@ Element::Element(int x, int y, int t_max) : x(x), y(y), t_max(t_max) {}
 ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 
 void ZapSprite::hit(Game *game) {
-  game->tanks[game->current_player].fire_element = 'V';
+  game->tanks[game->current_player].custom_shot =
+      [](Tank *tank, Game *game, int x, int y, int vx, int vy) {
+        for (int i = 0; i < 20; i++) {
+          for (auto w : game->walls) {
+            if (w.direction == 'H') {
+              if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
+                vx = -vx;
+              }
+
+              if (y == w.loc && w.start <= x && x <= w.stop) {
+                vy = -vy;
+              }
+            }
+            if (w.direction == 'V') {
+              if (vx == 0 && w.loc == x && (w.start == y || w.stop == y)) {
+                vy = -vy;
+              }
+              if (x == w.loc && w.start <= y && y <= w.stop) {
+                vx = -vx;
+              }
+            }
+          }
+          x += vx;
+          y += vy;
+          game->spawn<ZapPixel>(x, y);
+        }
+      };
   active = false;
 }
 
