@@ -7,16 +7,16 @@ Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
            int color_pair)
     : my_win(my_win), left(left), right(right), up(up), down(down),
       shoot(shoot), color_pair(color_pair) {
-  custom_shot = [](Tank *tank, Game *game, int sx, int sy, int vx, int vy) {
-    tank->request_shot(game, sx, sy, vx, vy);
+  custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
+    game->spawn_bullet(sx, sy, vx, vy);
   };
 }
 Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
            int down, int shoot, int color_pair)
     : my_win(my_win), x(x), y(y), image(image), orientation(image), left(left),
       right(right), up(up), down(down), shoot(shoot), color_pair(color_pair) {
-  custom_shot = [](Tank *tank, Game *game, int sx, int sy, int vx, int vy) {
-    tank->request_shot(game, sx, sy, vx, vy);
+  custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
+    game->spawn_bullet(sx, sy, vx, vy);
   };
 }
 
@@ -118,7 +118,7 @@ void Tank::request_shot(Game *game, int x, int y, int vx, int vy) {
 
 void Tank::q(Game *game) {
   auto [dx, dy, vx, vy] = MOVE_Q[orientation];
-  custom_shot(this, game, x + dx, y + dy, vx, vy);
+  custom_shot(game, x + dx, y + dy, vx, vy);
 }
 
 void Tank::update(Game *game, int ch, bool &run) {

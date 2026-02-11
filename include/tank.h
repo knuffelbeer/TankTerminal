@@ -52,7 +52,7 @@ public:
   void k();
   void j();
 
-  std::function<void(Tank* tank,Game *game, int x, int y, int dx, int dy)> custom_shot;
+  std::function<void(Game *game, int x, int y, int dx, int dy)> custom_shot;
   template <typename F> void for_all_points(F &&fun);
   void draw_single_point(int other_x, int other_y);
   void q(Game *game);
