@@ -13,9 +13,6 @@ private:
   inline static constexpr int MOVE_K[8][2]{
       {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
   };
-  inline static constexpr int MOVE_Q[8][4] = {
-      {3, 0, 1, 0},    {3, -2, 1, -1}, {0, -3, 0, -1}, {-3, -2, -1, -1},
-      {-3, 0, -1, -0}, {-3, 2, -1, 1}, {0, 3, 0, 1},   {3, 3, 1, 1}};
   inline static constexpr int MOVE_J[8][2] = {
       {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}};
 
@@ -31,15 +28,23 @@ private:
     D_RIGHT_DOWN,
 
   };
-  int x{}, y{};
   int image{};
-  int orientation{};
   WINDOW *my_win;
   int left, up, down, right, shoot;
   bool hit = false;
   int color_pair;
+  void draw_color(int color);
+  void update_for_move(Game *game, void (Tank::*move)(),
+                       void (Tank::*opposite)());
 
+	void setup();
 public:
+  int x{}, y{};
+  int orientation{};
+  inline static constexpr int MOVE_Q[8][4] = {
+      {3, 0, 1, 0},    {3, -2, 1, -1}, {0, -3, 0, -1}, {-3, -2, -1, -1},
+      {-3, 0, -1, -0}, {-3, 2, -1, 1}, {0, 3, 0, 1},   {3, 3, 1, 1}};
+  void normal_move(int ch, Game *game);
   char fire_element = 'B';
   Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
        int color_pair);
@@ -56,11 +61,11 @@ public:
   template <typename F> void for_all_points(F &&fun);
   void draw_single_point(int other_x, int other_y);
   void q(Game *game);
-  void request_shot(Game *game, int x, int y, int vx, int vy);
   void draw();
 
   bool check_move(const std::vector<Wall> &walls);
   void straight_horizontal();
   void straight_vertical();
-  void move(int ch, Game *game);
+	std::function<void(int, Game*)> move;
+  // void move(int ch, Game *game);
 };

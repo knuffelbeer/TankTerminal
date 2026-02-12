@@ -28,7 +28,7 @@ void Game::make_level(int num_level) {
              {'H', height / 2 + 3, 5, width / 3},
              {'H', 5, width - 10, width},
              {'H', height - 5, width - 10, width}};
-		elements.push_back(std::make_unique<ZapSprite>(5,5));
+    elements.push_back(std::make_unique<ZapSprite>(5, 5));
   } break;
   case 1: {
     walls = {{'H', 0, 0, width},
@@ -55,11 +55,12 @@ void Game::make_level(int num_level) {
 
 void Game::update_bullets() {
   for (int i = 0; i < elements.size();) {
-    elements[i]->move(this);
-    elements[i]->draw(this);
     if (!elements[i]->active) {
+      elements[i]->cleanup(this);
       elements.erase(elements.begin() + i);
     } else {
+      elements[i]->move(this);
+      elements[i]->draw(this);
       i++;
     }
   }
@@ -71,9 +72,11 @@ void Game::spawn_bullet(int x, int y, int vx, int vy) {
 }
 
 void Game::loop() {
+  for (Tank &t : tanks) {
+    t.draw();
+  }
   while (run) {
     ch = getch();
-    wclear(my_win);
     for (Wall w : walls) {
       w.draw(my_win);
     }

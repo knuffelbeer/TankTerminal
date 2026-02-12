@@ -1,22 +1,27 @@
 #include "../include/tank.h"
 #include "../include/game.h"
 #include <memory>
+#include <ncurses.h>
 #include <vector>
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
            int color_pair)
     : my_win(my_win), left(left), right(right), up(up), down(down),
       shoot(shoot), color_pair(color_pair) {
-  custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
-    game->spawn_bullet(sx, sy, vx, vy);
-  };
+  setup();
 }
 Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
            int down, int shoot, int color_pair)
     : my_win(my_win), x(x), y(y), image(image), orientation(image), left(left),
       right(right), up(up), down(down), shoot(shoot), color_pair(color_pair) {
+  setup();
+}
+void Tank::setup() {
   custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
     game->spawn_bullet(sx, sy, vx, vy);
+  };
+  move = [](int ch, Game *game) {
+    game->tanks[game->current_player].normal_move(ch, game);
   };
 }
 
@@ -86,12 +91,12 @@ bool Tank::check_hit(Game *game) {
   }
   return hit;
 }
-
-void Tank::draw() {
-  wattron(my_win, COLOR_PAIR(color_pair));
+void Tank::draw_color(int color) {
+  wattron(my_win, COLOR_PAIR(color));
   for_all_points([this](int x, int y) { draw_single_point(x, y); });
-  wattroff(my_win, COLOR_PAIR(color_pair));
+  wattroff(my_win, COLOR_PAIR(color));
 }
+void Tank::draw() { draw_color(color_pair); }
 
 bool Tank::check_move(const std::vector<Wall> &walls) {
   bool valid = true;
@@ -99,21 +104,17 @@ bool Tank::check_move(const std::vector<Wall> &walls) {
     for (const Wall &wall : walls) {
       switch (wall.direction) {
       case 'H':
-        if (y == wall.loc && x >= wall.start && x <= wall.stop)
+        if (y == wall.loc && x >= wall.start && x < wall.stop)
           valid = false;
         break;
       case 'V':
-        if (x == wall.loc && y >= wall.start && y <= wall.stop)
+        if (x == wall.loc && y >= wall.start && y < wall.stop)
           valid = false;
         break;
       }
     }
   });
   return valid;
-}
-
-void Tank::request_shot(Game *game, int x, int y, int vx, int vy) {
-  game->spawn_bullet(x, y, vx, vy);
 }
 
 void Tank::q(Game *game) {
@@ -123,37 +124,36 @@ void Tank::q(Game *game) {
 
 void Tank::update(Game *game, int ch, bool &run) {
   check_hit(game);
-  draw();
   move(ch, game);
 }
 
-void Tank::move(int ch, Game *game) {
+void Tank::update_for_move(Game *game, void (Tank::*move)(),
+                           void (Tank::*opposite)()) {
+  draw_color(0);
+  (this->*move)();
+  if (!check_move(game->walls)) {
+    (this->*opposite)();
+  }
+  draw_color(color_pair);
+}
+
+void Tank::normal_move(int ch, Game *game) {
+
+	draw();
   if (ch == ERR)
     return;
 
   else if (ch == down) {
-
-    j();
-    if (!check_move(game->walls))
-      k();
+    update_for_move(game, &Tank::j, &Tank::k);
 
   } else if (ch == up) {
-
-    k();
-    if (!check_move(game->walls))
-      j();
+    update_for_move(game, &Tank::k, &Tank::j);
 
   } else if (ch == left) {
-
-    h();
-    if (!check_move(game->walls))
-      l();
+    update_for_move(game, &Tank::h, &Tank::l);
 
   } else if (ch == right) {
-
-    l();
-    if (!check_move(game->walls))
-      h();
+    update_for_move(game, &Tank::l, &Tank::h);
 
   } else if (ch == shoot)
     q(game);

@@ -27,6 +27,7 @@ public:
   virtual void move(Game *game) {}
   virtual void draw(Game *game) {}
   virtual void hit(Game *game) {}
+  virtual void cleanup(Game *game);
 
 protected:
   Element(int x, int y);
@@ -39,6 +40,8 @@ class ZapSprite : public Element {
   void move(Game *game) override;
   void draw(Game *game) override;
   void hit(Game *game) override;
+	template<typename T>
+  void custom_shot(Game *game, int x, int y, int vx, int vy);
 
 public:
   bool fire = false;
@@ -52,6 +55,15 @@ public:
   void move(Game *game) override;
   void draw(Game *game) override;
   void hit(Game *game) override;
+};
+
+class ZapAimPixel : public Element {
+
+public:
+  ZapAimPixel(int x, int y) : Element(x, y) {};
+  void hit(Game *game) override;
+  void draw(Game *game) override;
+  void move(Game *game) override;
 };
 
 class Bullet : public Element {

@@ -1,4 +1,5 @@
 #include "../include/managegame.h"
+#include <ncurses.h>
 
 void ManageGame::run() {
   {
@@ -80,12 +81,14 @@ ManageGame::ManageGame() {
   curs_set(0);
   keypad(stdscr, TRUE);
   start_color();
+  init_pair(0, COLOR_BLACK, COLOR_BLACK);
   init_pair(1, COLOR_BLACK, COLOR_RED);
   init_pair(2, COLOR_BLACK, COLOR_BLUE);
   init_pair(3, COLOR_GREEN, COLOR_BLACK);
   init_pair(4, COLOR_GREEN, COLOR_YELLOW);
   init_pair(5, COLOR_RED, COLOR_BLACK);
   init_pair(6, COLOR_BLUE, COLOR_BLACK);
+  init_pair(7, COLOR_YELLOW, COLOR_BLACK);
 }
 
 ManageGame::~ManageGame() { endwin(); /* End curses mode		  */ }
