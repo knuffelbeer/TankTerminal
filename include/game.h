@@ -12,6 +12,7 @@
 class Game : public Window {
   void build();
   void update_bullets();
+	bool &ManageGame_run;
 
 public:
 	int border_height = 10;
@@ -25,8 +26,8 @@ public:
   std::vector<Bullet> bullets;
   std::vector<std::unique_ptr<Element>> elements;
   using Window::Window;
-  Game(int width, int height, int startx, int starty);
-  Game(int width, int height);
+  Game(bool &ManageGame_run,int width, int height, int startx, int starty);
+  Game(bool &ManageGamerun,int width, int height);
   void make_level(int num_level);
   void spawn_bullet(int x, int y, int vx, int vy);
 

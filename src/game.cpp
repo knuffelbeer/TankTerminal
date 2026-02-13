@@ -2,15 +2,18 @@
 #include <memory>
 #include <utility>
 
-Game::Game(int width, int height, int startx, int starty)
-    : Window(width, height, startx, starty) {
+Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
+    : Window(width, height, startx, starty), ManageGame_run(ManageGame_run) {
   build();
 }
 
-Game::Game(int width, int height) : Window(width, height) { build(); }
+Game::Game(bool &ManageGame_run, int width, int height)
+    : Window(width, height), ManageGame_run(ManageGame_run) {
+  build();
+}
 void Game::reset() {
   wclear(my_win);
-	run  = true;
+  run = true;
   elements.erase(elements.begin(), elements.end());
   for (auto &tank : tanks) {
     tank.reset();
@@ -98,8 +101,10 @@ void Game::loop() {
       current_player++;
     }
     update_bullets();
-    if (ch == 'x')
+    if (ch == 'x') {
+      ManageGame_run = false;
       break;
+    }
     wrefresh(my_win);
     usleep(DELTA_MS);
   }

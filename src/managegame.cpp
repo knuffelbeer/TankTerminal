@@ -49,11 +49,11 @@ void ManageGame::run() {
   }
   bool run = true;
   int l{};
-  auto g = Game(40, 30);
+  auto g = Game(run, 40, 30);
+  mvwprintw(g.my_win, g.level_height + 5, 0, "press x to quit game");
+  nodelay(stdscr, TRUE);
   while (run) {
     clear();
-    nodelay(stdscr, TRUE);
-    g.reset();
     l = (l + 1) % 3;
     g.make_level(l);
     for (int i = 0; i < g.tanks.size(); i++) {
@@ -64,21 +64,7 @@ void ManageGame::run() {
     }
 
     g.loop();
-    nodelay(stdscr, FALSE);
-    attron(COLOR_PAIR(3));
-    mvprintw(5, 15, "Game over! ");
-    mvprintw(8, 10, "[r]estart      [q]uit game");
-    attroff(COLOR_PAIR(3));
-    while (true) {
-      int ch = getch();
-      if (ch == 'q') {
-        run = false;
-        break;
-      }
-      if (ch == 'r') {
-        break;
-      }
-    }
+    g.reset();
   }
 }
 

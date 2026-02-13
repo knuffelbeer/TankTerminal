@@ -143,7 +143,16 @@ void ZapPixel::move(Game *game) {
     active = false;
 }
 
-void ZapPixel::hit(Game *game) { game->run = false; }
+void ZapPixel::hit(Game *game) { game->run = false;
+
+  game->run = false;
+  auto &tanks = game->tanks;
+  for (int i = 0; i < tanks.size(); i++) {
+    if (tanks[i].check_hit(x, y)) {
+      tanks[!i].score += 1;
+    }
+  }
+} 
 
 void ZapAimPixel::hit(Game *game) {}
 void ZapAimPixel::draw(Game *game) {
