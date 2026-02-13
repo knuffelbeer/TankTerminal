@@ -63,7 +63,6 @@ void Bullet::draw(Game *game) {
 void Bullet::hit(Game *game) {
   is_hit = true;
   active = false;
-  mvwprintw(game->my_win, 10, 10, "BOMBOCLAAT!!!");
   game->run = false;
   auto &tanks = game->tanks;
   for (int i = 0; i < tanks.size(); i++) {

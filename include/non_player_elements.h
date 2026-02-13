@@ -25,7 +25,7 @@ public:
   int x;
   int y;
   bool is_hit = false;
-  constexpr static int t_max = 20;
+  constexpr static int t_max = 30;
   virtual void move(Game *game) {}
   virtual void draw(Game *game) {}
   virtual void hit(Game *game) {}
