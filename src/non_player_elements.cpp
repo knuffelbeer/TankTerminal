@@ -1,6 +1,7 @@
 #include "../include/non_player_elements.h"
 #include "../include/game.h"
 #include <ncurses.h>
+#include <type_traits>
 
 void Wall::draw(WINDOW *my_win) {
   if (direction == 'H')
@@ -44,7 +45,15 @@ void Bullet::move(Game *game) {
 }
 
 void Bullet::draw(Game *game) { mvwaddch(game->my_win, y, x, ACS_BLOCK); }
-void Bullet::hit(Game *game) { game->run = false; }
+void Bullet::hit(Game *game) {
+  game->run = false;
+  auto &tanks = game->tanks;
+  for (int i = 0; i < tanks.size(); i++) {
+    if (tanks[i].check_hit(x, y)) {
+      tanks[!i].score += 1;
+    }
+  }
+}
 
 void Element::cleanup(Game *game) {
   wattron(game->my_win, 0);
@@ -59,7 +68,7 @@ ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 
 template <typename T>
 void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < T::range; i++) {
     for (auto w : game->walls) {
       if (w.direction == 'H') {
         if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
@@ -79,13 +88,16 @@ void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
         }
       }
     }
+    x += vx;
+    y += vy;
     for (auto &t : game->tanks) {
-      if (t.check_hit(game)) {
+      if (t.check_hit(x, y)) {
+        if constexpr (std::is_same_v<T, ZapPixel>) {
+          game->spawn<T>(x, y);
+        }
         return;
       }
     }
-    x += vx;
-    y += vy;
     game->spawn<T>(x, y);
   }
 }
@@ -108,7 +120,7 @@ void ZapSprite::hit(Game *game) {
     auto [dx, dy, vx, vy] = Tank::MOVE_Q[tank.orientation];
     tank.normal_move(ch, game);
     custom_shot<ZapAimPixel>(game, tank.x + dx, tank.y + dy, vx, vy);
-    tank.draw();
+    // tank.draw();
   };
   active = false;
 }

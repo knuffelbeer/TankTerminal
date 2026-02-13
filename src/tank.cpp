@@ -10,12 +10,19 @@ Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
       shoot(shoot), color_pair(color_pair) {
   setup();
 }
+
 Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
            int down, int shoot, int color_pair)
     : my_win(my_win), x(x), y(y), image(image), orientation(image), left(left),
       right(right), up(up), down(down), shoot(shoot), color_pair(color_pair) {
+
   setup();
 }
+void Tank::reset(){
+    hit = false;
+    setup();
+}
+
 void Tank::setup() {
   custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
     game->spawn_bullet(sx, sy, vx, vy);
@@ -70,7 +77,6 @@ void Tank::straight_vertical() {
 }
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
-
 template <typename F> void Tank::for_all_points(F &&fun) {
   auto amt_rows_tank = {0, 1};
   for (auto [dx, dy] : image_offsets.at(image)) {
@@ -78,7 +84,16 @@ template <typename F> void Tank::for_all_points(F &&fun) {
   }
 }
 
-bool Tank::check_hit(Game *game) {
+bool Tank::check_hit(int other_x, int other_y) {
+  bool is_hit = false;
+  for_all_points([&is_hit, other_x, other_y](int x, int y) {
+    if (x == other_x && y == other_y)
+      is_hit = true;
+  });
+  return is_hit;
+}
+
+bool Tank::check_and_process_hit(Game *game) {
   bool hit = false;
   for (auto &b : game->elements) {
     for_all_points([&b, &hit](int x, int y) {
@@ -123,8 +138,9 @@ void Tank::q(Game *game) {
 }
 
 void Tank::update(Game *game, int ch, bool &run) {
-  check_hit(game);
+  check_and_process_hit(game);
   move(ch, game);
+  draw();
 }
 
 void Tank::update_for_move(Game *game, void (Tank::*move)(),
@@ -134,12 +150,10 @@ void Tank::update_for_move(Game *game, void (Tank::*move)(),
   if (!check_move(game->walls)) {
     (this->*opposite)();
   }
-  draw_color(color_pair);
+  // draw_color(color_pair);
 }
 
 void Tank::normal_move(int ch, Game *game) {
-
-	draw();
   if (ch == ERR)
     return;
 

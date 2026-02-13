@@ -32,13 +32,15 @@ private:
   WINDOW *my_win;
   int left, up, down, right, shoot;
   bool hit = false;
-  int color_pair;
   void draw_color(int color);
   void update_for_move(Game *game, void (Tank::*move)(),
                        void (Tank::*opposite)());
 
-	void setup();
 public:
+	void reset();
+	void setup();
+  int color_pair;
+	int score{};
   int x{}, y{};
   int orientation{};
   inline static constexpr int MOVE_Q[8][4] = {
@@ -51,7 +53,8 @@ public:
   Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
        int down, int shoot, int color_pair);
   void update(Game *game, int ch, bool &run);
-  bool check_hit(Game *game);
+  bool check_and_process_hit(Game *game);
+	bool check_hit(int other_x, int other_y);
   void l();
   void h();
   void k();

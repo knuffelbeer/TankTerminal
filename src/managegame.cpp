@@ -49,12 +49,20 @@ void ManageGame::run() {
   }
   bool run = true;
   int l{};
+  auto g = Game(40, 30);
   while (run) {
     clear();
     nodelay(stdscr, TRUE);
-    auto g = Game(40, 20);
-    g.make_level(l);
+    g.reset();
     l = (l + 1) % 3;
+    g.make_level(l);
+    for (int i = 0; i < g.tanks.size(); i++) {
+      wattron(g.my_win, COLOR_PAIR(g.tanks[i].color_pair));
+      mvwprintw(g.my_win, g.level_height + 3, i * 10, "score: %i",
+                g.tanks[i].score);
+      wattroff(g.my_win, COLOR_PAIR(g.tanks[i].color_pair));
+    }
+
     g.loop();
     nodelay(stdscr, FALSE);
     attron(COLOR_PAIR(3));

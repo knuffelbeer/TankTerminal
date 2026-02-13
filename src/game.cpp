@@ -8,8 +8,18 @@ Game::Game(int width, int height, int startx, int starty)
 }
 
 Game::Game(int width, int height) : Window(width, height) { build(); }
+void Game::reset() {
+  wclear(my_win);
+	run  = true;
+  elements.erase(elements.begin(), elements.end());
+  for (auto &tank : tanks) {
+    tank.reset();
+  }
+}
 
 void Game::build() {
+  level_height = height - border_height;
+  level_width = width;
   Tank tank = Tank(my_win, 10, 10, 0, 'd', 'a', 'w', 's', 'q', 1);
   Tank tank2 =
       Tank(my_win, 25, 5, 0, KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, ' ', 2);
@@ -20,35 +30,37 @@ void Game::build() {
 void Game::make_level(int num_level) {
   switch (num_level) {
   case 0: {
-    walls = {{'H', 0, 0, width},
-             {'H', height - 1, 0, width},
-             {'V', 0, 0, height},
-             {'V', width - 1, 0, height},
-             {'V', width / 2, 0, height / 2},
-             {'H', height / 2 + 3, 5, width / 3},
-             {'H', 5, width - 10, width},
-             {'H', height - 5, width - 10, width}};
+    walls = {{'H', 0, 0, level_width},
+             {'H', level_height - 1, 0, level_width},
+             {'V', 0, 0, level_height},
+             {'V', level_width - 1, 0, level_height},
+             {'V', level_width / 2, 0, level_height / 2},
+             {'H', level_height / 2 + 3, 5, level_width / 3},
+             {'H', 5, level_width - 10, level_width},
+             {'H', level_height - 5, level_width - 10, level_width}};
     elements.push_back(std::make_unique<ZapSprite>(5, 5));
   } break;
   case 1: {
-    walls = {{'H', 0, 0, width},
-             {'H', height - 1, 0, width},
-             {'V', 0, 0, height},
-             {'V', width - 1, 0, height},
-             {'V', width / 2, 0, height / 2},
-             {'V', height / 2 + 3, 5, width / 3},
-             {'H', 5, width - 10, width},
-             {'V', width - 10, height - 10, height}};
+    walls = {{'H', 0, 0, level_width},
+             {'H', level_height - 1, 0, level_width},
+             {'V', 0, 0, level_height},
+             {'V', level_width - 1, 0, level_height},
+             {'V', level_width / 2, 0, level_height / 2},
+             {'V', level_height / 2 + 3, 5, level_width / 3},
+             {'H', 5, level_width - 10, level_width},
+             {'V', level_width - 10, level_height - 10, level_height}};
+    elements.push_back(std::make_unique<ZapSprite>(5, 5));
   } break;
   case 2: {
-    walls = {{'H', 0, 0, width - 5},
-             {'H', height - 1, 0, width - 5},
-             {'V', 0, 0, height},
-             {'V', (width - 5) - 1, 0, height},
-             {'V', 10, height - 5, height},
-             {'V', 20, 5, height - 10},
+    walls = {{'H', 0, 0, level_width - 5},
+             {'H', level_height - 1, 0, level_width - 5},
+             {'V', 0, 0, level_height},
+             {'V', (level_width - 5) - 1, 0, level_height},
+             {'V', 10, level_height - 5, level_height},
+             {'V', 20, 5, level_height - 10},
              {'H', 5, 10, 20},
-             {'V', width - 15, height - 10, height}};
+             {'V', level_width - 15, level_height - 10, level_height}};
+    elements.push_back(std::make_unique<ZapSprite>(8, 7));
   } break;
   }
 }
@@ -80,12 +92,12 @@ void Game::loop() {
     for (Wall w : walls) {
       w.draw(my_win);
     }
-    update_bullets();
     current_player = 0;
     for (Tank &t : tanks) {
       t.update(this, ch, run);
       current_player++;
     }
+    update_bullets();
     if (ch == 'x')
       break;
     wrefresh(my_win);

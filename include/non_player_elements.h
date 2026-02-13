@@ -37,6 +37,8 @@ protected:
 class ZapSprite : public Element {
   int vx;
   int vy;
+	int shoot_range = 40;
+	int aim_range = 40;
   void move(Game *game) override;
   void draw(Game *game) override;
   void hit(Game *game) override;
@@ -51,6 +53,7 @@ public:
 class ZapPixel : public Element {
 
 public:
+constexpr static int range = 40;
   ZapPixel(int x, int y);
   void move(Game *game) override;
   void draw(Game *game) override;
@@ -58,8 +61,8 @@ public:
 };
 
 class ZapAimPixel : public Element {
-
 public:
+constexpr static int range = 20;
   ZapAimPixel(int x, int y) : Element(x, y) {};
   void hit(Game *game) override;
   void draw(Game *game) override;

@@ -14,6 +14,9 @@ class Game : public Window {
   void update_bullets();
 
 public:
+	int border_height = 10;
+	int level_width;
+	int level_height;
   bool run = true;
   static constexpr int DELTA_MS = 100000;
   int current_player = 0;
@@ -33,5 +36,6 @@ public:
     temp->draw(this);
     elements.push_back(std::move(temp));
   }
+	void reset();
   void loop();
 };

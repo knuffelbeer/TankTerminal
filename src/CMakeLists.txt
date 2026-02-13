@@ -5,3 +5,5 @@ target_sources(TankTerminal PRIVATE
 	game.cpp
 	managegame.cpp
 )
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)

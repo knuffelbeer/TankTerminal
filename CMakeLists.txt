@@ -17,5 +17,6 @@ endif()
 add_executable(TankTerminal src/app.cpp)
 add_subdirectory(src)
 target_link_libraries(TankTerminal PRIVATE Curses::Curses)
-target_compile_options(TankTerminal PRIVATE
+target_compile_options(TankTerminal PRIVATE -g
 )
+
