@@ -15,6 +15,7 @@ class Game : public Window {
 	bool &ManageGame_run;
 
 public:
+	std::vector<std::array<int, 2>> tank_positions;
 	int border_height = 10;
 	int level_width;
 	int level_height;

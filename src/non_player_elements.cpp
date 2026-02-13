@@ -11,7 +11,6 @@ void Wall::draw(WINDOW *my_win) {
 }
 
 Bullet::Bullet(int x, int y, int vx, int vy) : Element(x, y), vx(vx), vy(vy) {
-  t_max = 10;
 }
 
 void Bullet::move(Game *game) {
@@ -62,7 +61,6 @@ void Element::cleanup(Game *game) {
 }
 
 Element::Element(int x, int y) : x(x), y(y) {}
-Element::Element(int x, int y, int t_max) : x(x), y(y), t_max(t_max) {}
 
 ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 
@@ -135,7 +133,7 @@ void ZapPixel::draw(Game *game) {
   wattroff(game->my_win, COLOR_PAIR(3));
 }
 
-ZapPixel::ZapPixel(int x, int y) : Element(x, y, 5) {}
+ZapPixel::ZapPixel(int x, int y) : Element(x, y) {}
 
 void ZapPixel::move(Game *game) {
   t++;

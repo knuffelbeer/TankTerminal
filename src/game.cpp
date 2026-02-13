@@ -15,19 +15,22 @@ void Game::reset() {
   wclear(my_win);
   run = true;
   elements.erase(elements.begin(), elements.end());
-  for (auto &tank : tanks) {
+  for (int i = 0; i < tanks.size(); i++) {
+    auto &tank = tanks[i];
     tank.reset();
+    auto [x, y] = tank_positions[i];
+    tank.x = x;
+    tank.y = y;
   }
 }
 
 void Game::build() {
   level_height = height - border_height;
   level_width = width;
-  Tank tank = Tank(my_win, 10, 10, 0, 'd', 'a', 'w', 's', 'q', 1);
-  Tank tank2 =
-      Tank(my_win, 25, 5, 0, KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, ' ', 2);
-  tanks.push_back(tank);
-  tanks.push_back(tank2);
+  tanks = {
+      Tank(my_win, 10, 10, 0, 'd', 'a', 'w', 's', 'q', 1),
+      Tank(my_win, 25, 5, 0, KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, ' ', 2)};
+  tank_positions = {{10, 10}, {25, 5}};
 }
 
 void Game::make_level(int num_level) {
