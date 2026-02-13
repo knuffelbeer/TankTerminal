@@ -1,4 +1,3 @@
-[demo](demo.mp4)
 A simple tank game in the terminal based on Tank Trouble.
 
 
