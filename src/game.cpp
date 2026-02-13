@@ -1,5 +1,6 @@
 #include "../include/game.h"
 #include <memory>
+#include <ncurses.h>
 #include <utility>
 
 Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
@@ -98,12 +99,12 @@ void Game::loop() {
     for (Wall w : walls) {
       w.draw(my_win);
     }
-    current_player = 0;
-    for (Tank &t : tanks) {
-      t.update(this, ch, run);
-      current_player++;
+    for (auto p : {0, 1}) {
+      current_player = p;
+      tanks[p].update(this, ch, run);
     }
     update_bullets();
+
     if (ch == 'x') {
       ManageGame_run = false;
       break;

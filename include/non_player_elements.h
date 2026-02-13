@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <iostream>
 #include <ncurses.h>
 #include <vector>
@@ -23,6 +24,7 @@ public:
   bool active = true;
   int x;
   int y;
+  bool is_hit = false;
   constexpr static int t_max = 20;
   virtual void move(Game *game) {}
   virtual void draw(Game *game) {}
@@ -39,7 +41,7 @@ class ZapSprite : public Element {
   void move(Game *game) override;
   void draw(Game *game) override;
   void hit(Game *game) override;
-	template<typename T>
+  template <typename T>
   void custom_shot(Game *game, int x, int y, int vx, int vy);
 
 public:
@@ -50,8 +52,8 @@ public:
 class ZapPixel : public Element {
 
 public:
-constexpr static int t_max = 5;
-constexpr static int range = 40;
+  constexpr static int t_max = 5;
+  constexpr static int range = 40;
   ZapPixel(int x, int y);
   void move(Game *game) override;
   void draw(Game *game) override;
@@ -60,7 +62,7 @@ constexpr static int range = 40;
 
 class ZapAimPixel : public Element {
 public:
-constexpr static int range = 20;
+  constexpr static int range = 20;
   ZapAimPixel(int x, int y) : Element(x, y) {};
   void hit(Game *game) override;
   void draw(Game *game) override;
@@ -76,6 +78,7 @@ public:
   void hit(Game *game) override;
 
 private:
+  std::array<int, 2> prev_loc;
   int vx;
   int vy;
 };

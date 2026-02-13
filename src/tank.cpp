@@ -150,7 +150,6 @@ void Tank::update_for_move(Game *game, void (Tank::*move)(),
   if (!check_move(game->walls)) {
     (this->*opposite)();
   }
-  // draw_color(color_pair);
 }
 
 void Tank::normal_move(int ch, Game *game) {

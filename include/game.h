@@ -12,6 +12,7 @@
 class Game : public Window {
   void build();
   void update_bullets();
+	void draw_bullets();
 	bool &ManageGame_run;
 
 public:

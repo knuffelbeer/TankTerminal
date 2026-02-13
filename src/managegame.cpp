@@ -64,6 +64,7 @@ void ManageGame::run() {
     }
 
     g.loop();
+    usleep(999999);
     g.reset();
   }
 }

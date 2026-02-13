@@ -10,13 +10,12 @@ void Wall::draw(WINDOW *my_win) {
     mvwvline(my_win, start, loc, '|', stop - start);
 }
 
-Bullet::Bullet(int x, int y, int vx, int vy) : Element(x, y), vx(vx), vy(vy) {
-}
+Bullet::Bullet(int x, int y, int vx, int vy)
+    : Element(x, y), vx(vx), vy(vy), prev_loc({x, y}) {}
 
 void Bullet::move(Game *game) {
-  wattron(game->my_win, 0);
-  mvwaddch(game->my_win, y, x, ' ');
-  wattroff(game->my_win, 0);
+  if (is_hit)
+    return;
   for (auto w : game->walls) {
     if (w.direction == 'H') {
       if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
@@ -36,15 +35,35 @@ void Bullet::move(Game *game) {
       }
     }
   }
+  prev_loc = {x, y};
+  if (t == t_max) {
+    mvwaddch(game->my_win, y, x, ' ');
+    active = false;
+  }
   x += vx;
   y += vy;
   t++;
-  if (t == t_max)
-    active = false;
 }
 
-void Bullet::draw(Game *game) { mvwaddch(game->my_win, y, x, ACS_BLOCK); }
+void Bullet::draw(Game *game) {
+  auto [prev_x, prev_y] = prev_loc;
+  for (auto &tank : game->tanks) {
+
+    if (tank.check_hit(x, y)) {
+      mvwaddch(game->my_win, prev_y, prev_x, ' ');
+      return;
+    }
+  }
+  if (active) {
+    mvwaddch(game->my_win, prev_y, prev_x, ' ');
+    mvwaddch(game->my_win, y, x, ACS_BLOCK);
+  }
+}
+
 void Bullet::hit(Game *game) {
+  is_hit = true;
+  active = false;
+  mvwprintw(game->my_win, 10, 10, "BOMBOCLAAT!!!");
   game->run = false;
   auto &tanks = game->tanks;
   for (int i = 0; i < tanks.size(); i++) {
@@ -55,6 +74,10 @@ void Bullet::hit(Game *game) {
 }
 
 void Element::cleanup(Game *game) {
+  for (auto &tank : game->tanks) {
+    if (tank.check_hit(x, y))
+      return;
+  }
   wattron(game->my_win, 0);
   mvwaddch(game->my_win, y, x, ' ');
   wattroff(game->my_win, 0);
@@ -101,6 +124,7 @@ void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
 }
 
 void ZapSprite::hit(Game *game) {
+				active = false;
   game->tanks[game->current_player].custom_shot =
       [this](Game *game, int x, int y, int vx, int vy) {
         custom_shot<ZapPixel>(game, x, y, vx, vy);
@@ -123,7 +147,10 @@ void ZapSprite::hit(Game *game) {
   active = false;
 }
 
-void ZapSprite::draw(Game *game) { mvwaddch(game->my_win, y, x, '+'); }
+void ZapSprite::draw(Game *game) {
+  if (active)
+    mvwaddch(game->my_win, y, x, '+');
+}
 
 void ZapSprite::move(Game *game) {}
 
@@ -141,7 +168,8 @@ void ZapPixel::move(Game *game) {
     active = false;
 }
 
-void ZapPixel::hit(Game *game) { game->run = false;
+void ZapPixel::hit(Game *game) {
+  game->run = false;
 
   game->run = false;
   auto &tanks = game->tanks;
@@ -150,7 +178,7 @@ void ZapPixel::hit(Game *game) { game->run = false;
       tanks[!i].score += 1;
     }
   }
-} 
+}
 
 void ZapAimPixel::hit(Game *game) {}
 void ZapAimPixel::draw(Game *game) {
