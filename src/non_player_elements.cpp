@@ -16,21 +16,28 @@ Bullet::Bullet(int x, int y, int vx, int vy)
 void Bullet::move(Game *game) {
   if (is_hit)
     return;
+  auto flipped = false; // to avoid flipping twice for overlapping walls.
   for (auto w : game->walls) {
+    if (flipped)
+      break;
     if (w.direction == 'H') {
       if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
+        flipped = true;
         vx = -vx;
       }
 
       if (y == w.loc && w.start <= x && x < w.stop) {
         vy = -vy;
+        flipped = true;
       }
     }
     if (w.direction == 'V') {
       if (vx == 0 && w.loc == x && (w.start == y || w.stop == y)) {
         vy = -vy;
+        flipped = true;
       }
       if (x == w.loc && w.start <= y && y < w.stop) {
+        flipped = true;
         vx = -vx;
       }
     }
@@ -89,22 +96,29 @@ ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 template <typename T>
 void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
   for (int i = 0; i < T::range; i++) {
+    auto flipped = false;
     for (auto w : game->walls) {
+      if (flipped)
+        break;
       if (w.direction == 'H') {
         if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
           vx = -vx;
+          flipped = true;
         }
 
         if (y == w.loc && w.start <= x && x <= w.stop) {
           vy = -vy;
+          flipped = true;
         }
       }
       if (w.direction == 'V') {
         if (vx == 0 && w.loc == x && (w.start == y || w.stop == y)) {
           vy = -vy;
+          flipped = true;
         }
         if (x == w.loc && w.start <= y && y <= w.stop) {
           vx = -vx;
+          flipped = true;
         }
       }
     }
@@ -123,7 +137,7 @@ void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
 }
 
 void ZapSprite::hit(Game *game) {
-				active = false;
+  active = false;
   game->tanks[game->current_player].custom_shot =
       [this](Game *game, int x, int y, int vx, int vy) {
         custom_shot<ZapPixel>(game, x, y, vx, vy);
