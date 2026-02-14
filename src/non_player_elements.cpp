@@ -10,12 +10,7 @@ void Wall::draw(WINDOW *my_win) {
     mvwvline(my_win, start, loc, '|', stop - start);
 }
 
-Bullet::Bullet(int x, int y, int vx, int vy)
-    : Element(x, y), vx(vx), vy(vy), prev_loc({x, y}) {}
-
-void Bullet::move(Game *game) {
-  if (is_hit)
-    return;
+std::array<int, 2> Element::step(Game *game) {
   auto flipped = false; // to avoid flipping twice for overlapping walls.
   for (auto w : game->walls) {
     if (flipped)
@@ -42,11 +37,47 @@ void Bullet::move(Game *game) {
       }
     }
   }
-  prev_loc = {x, y};
+  return {x + vx, y + vy};
+}
+
+Bullet::Bullet(int x, int y, int vx, int vy)
+    : Element(x, y, vx, vy), prev_loc({x, y}) {}
+
+void Bullet::move(Game *game) {
+  if (is_hit)
+    return;
+  bool flipped_x{}, flipped_y{};
   if (t == t_max) {
     mvwaddch(game->my_win, y, x, ' ');
     active = false;
+    return;
   }
+  for (auto w : game->walls) {
+    if (w.direction == 'H') {
+      if (!flipped_x && vy == 0 && w.loc == y &&
+          (w.start == x || w.stop == x)) {
+        flipped_x = true;
+        vx = -vx;
+      }
+
+      if (!flipped_y && y == w.loc && w.start <= x && x < w.stop) {
+        vy = -vy;
+        flipped_y = true;
+      }
+    }
+    if (w.direction == 'V') {
+      if (!flipped_y && vx == 0 && w.loc == x &&
+          (w.start == y || w.stop == y)) {
+        vy = -vy;
+        flipped_y = true;
+      }
+      if (!flipped_x && x == w.loc && w.start <= y && y < w.stop) {
+        flipped_x = true;
+        vx = -vx;
+      }
+    }
+  }
+  prev_loc = {x, y};
   x += vx;
   y += vy;
   t++;
@@ -90,6 +121,7 @@ void Element::cleanup(Game *game) {
 }
 
 Element::Element(int x, int y) : x(x), y(y) {}
+Element::Element(int x, int y, int vx, int vy) : x(x), y(y), vx(vx), vy(vy) {}
 
 ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 
