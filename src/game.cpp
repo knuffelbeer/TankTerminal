@@ -1,3 +1,4 @@
+#include "../include/wall.h"
 #include "../include/game.h"
 #include <memory>
 #include <ncurses.h>

@@ -1,6 +1,7 @@
 #pragma once
 #include "ncurses.h"
-#include "non_player_elements.h"
+#include "elements/element.h"
+#include "wall.h"
 #include <functional>
 #include <map>
 #include <memory>

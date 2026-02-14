@@ -1,6 +1,8 @@
 #pragma once
 #include "ncurses.h"
-#include "non_player_elements.h"
+#include "elements/zap.h"
+#include "../include/elements/element.h"
+#include "../include/elements/bullet.h"
 #include "tank.h"
 #include "window.h"
 #include <algorithm>

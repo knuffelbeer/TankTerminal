@@ -1,10 +1,7 @@
 target_sources(TankTerminal PRIVATE
-	wall.cpp
-	window.cpp
-	tank.cpp
-	game.cpp
-	managegame.cpp
+element.cpp
+bullet.cpp
+zap.cpp
 )
-add_subdirectory(elements)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
