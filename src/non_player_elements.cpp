@@ -15,7 +15,7 @@ void Element::step(Game *game, int &x, int &y, int &vx, int &vy) {
   for (auto w : game->walls) {
     if (w.direction == 'H') {
       if (!flipped_x && vy == 0 && w.loc == y &&
-          (w.start == x || w.stop == x)) {
+          (w.start == x || w.stop - 2 == x)) {
         flipped_x = true;
         vx = -vx;
       }
@@ -27,7 +27,7 @@ void Element::step(Game *game, int &x, int &y, int &vx, int &vy) {
     }
     if (w.direction == 'V') {
       if (!flipped_y && vx == 0 && w.loc == x &&
-          (w.start == y || w.stop == y)) {
+          (w.start == y || w.stop - 2 == y)) {
         vy = -vy;
         flipped_y = true;
       }
@@ -58,7 +58,7 @@ void Bullet::move(Game *game) {
 }
 
 void Bullet::draw(Game *game) {
-  if (active) {
+  if (active ) {
     auto [prev_x, prev_y] = prev_loc;
     mvwaddch(game->my_win, prev_y, prev_x, ' ');
     for (auto &tank : game->tanks) {
@@ -140,8 +140,8 @@ void ZapSprite::draw(Game *game) {
     mvwaddch(game->my_win, y, x, '+');
 }
 
-void ZapSprite::cleanup(Game* game){} // no cleanup, since it's always 
-																			// overlapped by a tank.
+void ZapSprite::cleanup(Game *game) {} // no cleanup, since it's always
+                                       // overlapped by a tank.
 
 void ZapSprite::move(Game *game) {}
 
