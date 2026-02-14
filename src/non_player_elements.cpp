@@ -10,48 +10,8 @@ void Wall::draw(WINDOW *my_win) {
     mvwvline(my_win, start, loc, '|', stop - start);
 }
 
-std::array<int, 2> Element::step(Game *game) {
-  auto flipped = false; // to avoid flipping twice for overlapping walls.
-  for (auto w : game->walls) {
-    if (flipped)
-      break;
-    if (w.direction == 'H') {
-      if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
-        flipped = true;
-        vx = -vx;
-      }
-
-      if (y == w.loc && w.start <= x && x < w.stop) {
-        vy = -vy;
-        flipped = true;
-      }
-    }
-    if (w.direction == 'V') {
-      if (vx == 0 && w.loc == x && (w.start == y || w.stop == y)) {
-        vy = -vy;
-        flipped = true;
-      }
-      if (x == w.loc && w.start <= y && y < w.stop) {
-        flipped = true;
-        vx = -vx;
-      }
-    }
-  }
-  return {x + vx, y + vy};
-}
-
-Bullet::Bullet(int x, int y, int vx, int vy)
-    : Element(x, y, vx, vy), prev_loc({x, y}) {}
-
-void Bullet::move(Game *game) {
-  if (is_hit)
-    return;
+void Element::step(Game *game, int &x, int &y, int &vx, int &vy) {
   bool flipped_x{}, flipped_y{};
-  if (t == t_max) {
-    mvwaddch(game->my_win, y, x, ' ');
-    active = false;
-    return;
-  }
   for (auto w : game->walls) {
     if (w.direction == 'H') {
       if (!flipped_x && vy == 0 && w.loc == y &&
@@ -77,23 +37,35 @@ void Bullet::move(Game *game) {
       }
     }
   }
+  x = x + vx;
+  y = y + vy;
+}
+
+Bullet::Bullet(int x, int y, int vx, int vy)
+    : Element(x, y, vx, vy), prev_loc({x, y}) {}
+
+void Bullet::move(Game *game) {
+  if (is_hit)
+    return;
+  if (t == t_max) {
+    mvwaddch(game->my_win, y, x, ' ');
+    active = false;
+    return;
+  }
   prev_loc = {x, y};
-  x += vx;
-  y += vy;
+  step(game, x, y, vx, vy);
   t++;
 }
 
 void Bullet::draw(Game *game) {
-  auto [prev_x, prev_y] = prev_loc;
-  for (auto &tank : game->tanks) {
-
-    if (tank.check_hit(x, y)) {
-      mvwaddch(game->my_win, prev_y, prev_x, ' ');
-      return;
-    }
-  }
   if (active) {
+    auto [prev_x, prev_y] = prev_loc;
     mvwaddch(game->my_win, prev_y, prev_x, ' ');
+    for (auto &tank : game->tanks) {
+      if (tank.check_hit(x, y)) {
+        return;
+      }
+    }
     mvwaddch(game->my_win, y, x, ACS_BLOCK);
   }
 }
@@ -128,34 +100,7 @@ ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 template <typename T>
 void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
   for (int i = 0; i < T::range; i++) {
-    auto flipped = false;
-    for (auto w : game->walls) {
-      if (flipped)
-        break;
-      if (w.direction == 'H') {
-        if (vy == 0 && w.loc == y && (w.start == x || w.stop == x)) {
-          vx = -vx;
-          flipped = true;
-        }
-
-        if (y == w.loc && w.start <= x && x <= w.stop) {
-          vy = -vy;
-          flipped = true;
-        }
-      }
-      if (w.direction == 'V') {
-        if (vx == 0 && w.loc == x && (w.start == y || w.stop == y)) {
-          vy = -vy;
-          flipped = true;
-        }
-        if (x == w.loc && w.start <= y && y <= w.stop) {
-          vx = -vx;
-          flipped = true;
-        }
-      }
-    }
-    x += vx;
-    y += vy;
+    step(game, x, y, vx, vy);
     for (auto &t : game->tanks) {
       if (t.check_hit(x, y)) {
         if constexpr (std::is_same_v<T, ZapPixel>) {
@@ -170,24 +115,22 @@ void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
 
 void ZapSprite::hit(Game *game) {
   active = false;
-  game->tanks[game->current_player].custom_shot =
-      [this](Game *game, int x, int y, int vx, int vy) {
-        custom_shot<ZapPixel>(game, x, y, vx, vy);
-        auto &tank = game->tanks[game->current_player];
-
-        tank.custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
-          game->spawn_bullet(sx, sy, vx, vy);
-        };
-        tank.move = [](int ch, Game *game) {
-          game->tanks[game->current_player].normal_move(ch, game);
-        };
-      };
-  game->tanks[game->current_player].move = [this](int ch, Game *game) {
-    auto &tank = game->tanks[game->current_player];
-    auto [dx, dy, vx, vy] = Tank::MOVE_Q[tank.orientation];
-    tank.normal_move(ch, game);
-    custom_shot<ZapAimPixel>(game, tank.x + dx, tank.y + dy, vx, vy);
-    // tank.draw();
+  auto &player = game->tanks[game->current_player];
+  player.custom_shot = [this, &player](Game *game, int x, int y, int vx,
+                                       int vy) {
+    custom_shot<ZapPixel>(game, x, y, vx, vy);
+    player.custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
+      game->spawn_bullet(sx, sy, vx, vy);
+    };
+    player.move = [&player](int ch, Game *game) {
+      player.normal_move(ch, game);
+    };
+  };
+  player.move = [this, &player](int ch, Game *game) {
+    auto [dx, dy, vx, vy] = Tank::MOVE_Q[player.orientation];
+    player.normal_move(ch, game);
+    if (ch != player.shoot)
+      custom_shot<ZapAimPixel>(game, player.x + dx, player.y + dy, vx, vy);
   };
   active = false;
 }
@@ -197,9 +140,14 @@ void ZapSprite::draw(Game *game) {
     mvwaddch(game->my_win, y, x, '+');
 }
 
+void ZapSprite::cleanup(Game* game){} // no cleanup, since it's always 
+																			// overlapped by a tank.
+
 void ZapSprite::move(Game *game) {}
 
 void ZapPixel::draw(Game *game) {
+  if (is_hit)
+    return;
   wattron(game->my_win, COLOR_PAIR(3));
   mvwaddch(game->my_win, y, x, '.');
   wattroff(game->my_win, COLOR_PAIR(3));
@@ -215,8 +163,7 @@ void ZapPixel::move(Game *game) {
 
 void ZapPixel::hit(Game *game) {
   game->run = false;
-
-  game->run = false;
+  is_hit = true;
   auto &tanks = game->tanks;
   for (int i = 0; i < tanks.size(); i++) {
     if (tanks[i].check_hit(x, y)) {

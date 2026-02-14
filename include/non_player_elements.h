@@ -37,12 +37,10 @@ protected:
   Element(int x, int y);
   Element(int x, int y, int vx, int vy);
 
-  std::array<int, 2> step(Game *game);
+  void step(Game *game, int &x, int &y, int &vx, int &vy);
 };
 
 class ZapSprite : public Element {
-  // int vx;
-  // int vy;
   void move(Game *game) override;
   void draw(Game *game) override;
   void hit(Game *game) override;
@@ -50,6 +48,7 @@ class ZapSprite : public Element {
   void custom_shot(Game *game, int x, int y, int vx, int vy);
 
 public:
+  void cleanup(Game *game) override;
   bool fire = false;
   ZapSprite(int x, int y);
 };
@@ -84,6 +83,4 @@ public:
 
 private:
   std::array<int, 2> prev_loc;
-  // int vx;
-  // int vy;
 };

@@ -30,17 +30,18 @@ private:
   };
   int image{};
   WINDOW *my_win;
-  int left, up, down, right, shoot;
+  int left, up, down, right;
   bool hit = false;
   void draw_color(int color);
   void update_for_move(Game *game, void (Tank::*move)(),
                        void (Tank::*opposite)());
 
 public:
-	void reset();
-	void setup();
+  int shoot;
+  void reset();
+  void setup();
   int color_pair;
-	int score{};
+  int score{};
   int x{}, y{};
   int orientation{};
   inline static constexpr int MOVE_Q[8][4] = {
@@ -54,7 +55,7 @@ public:
        int down, int shoot, int color_pair);
   void update(Game *game, int ch, bool &run);
   bool check_and_process_hit(Game *game);
-	bool check_hit(int other_x, int other_y);
+  bool check_hit(int other_x, int other_y);
   void l();
   void h();
   void k();
@@ -69,6 +70,6 @@ public:
   bool check_move(const std::vector<Wall> &walls);
   void straight_horizontal();
   void straight_vertical();
-	std::function<void(int, Game*)> move;
+  std::function<void(int, Game *)> move;
   // void move(int ch, Game *game);
 };
