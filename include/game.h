@@ -36,10 +36,12 @@ public:
   void spawn_bullet(int x, int y, int vx, int vy);
 
   template <typename T, typename... Args>
-  void spawn(int x, int y, Args &&...args) {
+  T& spawn(int x, int y, Args &&...args) {
     auto temp = std::make_unique<T>(x, y, std::forward<Args>(args)...);
+		T& ref = *temp;
     temp->draw(this);
     elements.push_back(std::move(temp));
+		return ref;
   }
 	void reset();
   void loop();

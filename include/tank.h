@@ -1,6 +1,6 @@
 #pragma once
-#include "ncurses.h"
 #include "elements/element.h"
+#include "ncurses.h"
 #include "wall.h"
 #include <functional>
 #include <map>
@@ -10,7 +10,6 @@ class Game;
 class Tank {
 
 private:
-  static const std::map<int, std::vector<std::pair<int, int>>> image_offsets;
   inline static constexpr int MOVE_K[8][2]{
       {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
   };
@@ -29,15 +28,15 @@ private:
     D_RIGHT_DOWN,
 
   };
+  static const std::map<int, std::vector<std::pair<int, int>>> image_offsets;
   int image{};
   WINDOW *my_win;
-  int left, up, down, right;
-  bool hit = false;
   void draw_color(int color);
   void update_for_move(Game *game, void (Tank::*move)(),
                        void (Tank::*opposite)());
 
 public:
+  int left, up, down, right;
   int shoot;
   void reset();
   void setup();
@@ -48,7 +47,6 @@ public:
   inline static constexpr int MOVE_Q[8][4] = {
       {3, 0, 1, 0},    {3, -2, 1, -1}, {0, -3, 0, -1}, {-3, -2, -1, -1},
       {-3, 0, -1, -0}, {-3, 2, -1, 1}, {0, 3, 0, 1},   {3, 3, 1, 1}};
-  void normal_move(int ch, Game *game);
   char fire_element = 'B';
   Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
        int color_pair);
@@ -72,5 +70,6 @@ public:
   void straight_horizontal();
   void straight_vertical();
   std::function<void(int, Game *)> move;
-  // void move(int ch, Game *game);
+  static std::function<void(Game *, int, int, int, int)> normal_shoot;
+  static std::function<void(int, Game *)> normal_move;
 };

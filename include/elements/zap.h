@@ -14,7 +14,7 @@ class ZapSprite : public Element {
   void draw(Game *game) override;
   void hit(Game *game) override;
   template <typename T>
-  void custom_shot(Game *game, int x, int y, int vx, int vy);
+  static void custom_shot(Game *game, int x, int y, int vx, int vy);
 
 public:
   void cleanup(Game *game) override;

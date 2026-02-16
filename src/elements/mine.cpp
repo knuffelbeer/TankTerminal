@@ -25,12 +25,13 @@ void MineSprite::hit(Game *game) {
   int player = game->current_player;
   auto &tank = game->tanks[player];
   tank.move = Tank::normal_move;
-  tank.custom_shot = [&tank, player, this](Game *game, int sx, int sy, int vx,
-                                           int vy) {
+  tank.custom_shot = [player, this](Game *game, int sx, int sy, int vx,
+                                    int vy) {
+    auto &tank = game->tanks[player];
     if (this->amt_spawned == 3) {
       this->active = false;
-      game->tanks[player].custom_shot = Tank::normal_shoot;
-      game->tanks[player].q(game);
+      tank.custom_shot = Tank::normal_shoot;
+      tank.q(game);
       return;
     }
     this->amt_spawned++;
