@@ -1,8 +1,14 @@
 #include "../include/tank.h"
 #include "../include/game.h"
+#include <functional>
 #include <memory>
 #include <ncurses.h>
 #include <vector>
+
+std::function<void(Game *game, int, int, int, int)> Tank::normal_shoot =
+    [](Game *game, int sx, int sy, int vx, int vy) {
+      game->spawn_bullet(sx, sy, vx, vy);
+    };
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
            int color_pair)
@@ -18,18 +24,11 @@ Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
 
   setup();
 }
-void Tank::reset(){
-    hit = false;
-    setup();
-}
+void Tank::reset() { setup(); }
 
 void Tank::setup() {
-  custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
-    game->spawn_bullet(sx, sy, vx, vy);
-  };
-  move = [](int ch, Game *game) {
-    game->tanks[game->current_player].normal_move(ch, game);
-  };
+  custom_shot = normal_shoot;
+  move = normal_move;
 }
 
 void Tank::l() {
@@ -94,17 +93,19 @@ bool Tank::check_hit(int other_x, int other_y) {
 }
 
 bool Tank::check_and_process_hit(Game *game) {
-  bool hit = false;
+  bool is_hit = false;
   for (auto &b : game->elements) {
-    for_all_points([&b, &hit](int x, int y) {
+    bool hit = false;
+    for_all_points([&b, &hit, &is_hit](int x, int y) {
       if (x == b->x && y == b->y)
         hit = true;
+      is_hit = true;
     });
     if (hit) {
       b->hit(game);
     }
   }
-  return hit;
+  return is_hit;
 }
 void Tank::draw_color(int color) {
   wattron(my_win, COLOR_PAIR(color));
@@ -152,25 +153,24 @@ void Tank::update_for_move(Game *game, void (Tank::*move)(),
   }
 }
 
-void Tank::normal_move(int ch, Game *game) {
+std::function<void(int, Game *)> Tank::normal_move = [](int ch, Game *game) {
+  auto &current_tank = game->tanks[game->current_player];
   if (ch == ERR)
     return;
+  else if (ch == current_tank.down) {
+    current_tank.update_for_move(game, &Tank::j, &Tank::k);
+  } else if (ch == current_tank.up) {
+    current_tank.update_for_move(game, &Tank::k, &Tank::j);
 
-  else if (ch == down) {
-    update_for_move(game, &Tank::j, &Tank::k);
+  } else if (ch == current_tank.left) {
+    current_tank.update_for_move(game, &Tank::h, &Tank::l);
 
-  } else if (ch == up) {
-    update_for_move(game, &Tank::k, &Tank::j);
+  } else if (ch == current_tank.right) {
+    current_tank.update_for_move(game, &Tank::l, &Tank::h);
 
-  } else if (ch == left) {
-    update_for_move(game, &Tank::h, &Tank::l);
-
-  } else if (ch == right) {
-    update_for_move(game, &Tank::l, &Tank::h);
-
-  } else if (ch == shoot)
-    q(game);
-}
+  } else if (ch == current_tank.shoot)
+    current_tank.q(game);
+};
 
 const std::map<int, std::vector<std::pair<int, int>>> Tank::image_offsets = {
     {D_HORIZONTAL_RIGHT,

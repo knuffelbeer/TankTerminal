@@ -1,6 +1,12 @@
 #include "../../include/elements/zap.h"
 #include "../../include/game.h"
 
+/*
+ * The ZapSprite activates the special. the ZapPixel's get shot when firing the
+ * special, and the ZapAimPixel's get displaid when aiming.
+ * they all inherit from Element, and thus can be updated by the game loop.
+ * */
+
 ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
 
 template <typename T>
@@ -22,23 +28,18 @@ void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
 void ZapSprite::hit(Game *game) {
   active = false;
   auto &player = game->tanks[game->current_player];
-  player.custom_shot = [this, &player](Game *game, int x, int y, int vx,
-                                       int vy) {
-    custom_shot<ZapPixel>(game, x, y, vx, vy);
-    player.custom_shot = [](Game *game, int sx, int sy, int vx, int vy) {
-      game->spawn_bullet(sx, sy, vx, vy);
-    };
-    player.move = [&player](int ch, Game *game) {
-      player.normal_move(ch, game);
-    };
+  player.custom_shot = [&player](Game *game, int x, int y, int vx, int vy) {
+    ZapSprite::custom_shot<ZapPixel>(game, x, y, vx, vy);
+    player.move = Tank::normal_move;
+    player.custom_shot = Tank::normal_shoot;
   };
-  player.move = [this, &player](int ch, Game *game) {
+  player.move = [&player](int ch, Game *game) {
     auto [dx, dy, vx, vy] = Tank::MOVE_Q[player.orientation];
     player.normal_move(ch, game);
     if (ch != player.shoot)
-      custom_shot<ZapAimPixel>(game, player.x + dx, player.y + dy, vx, vy);
+      ZapSprite::custom_shot<ZapAimPixel>(game, player.x + dx, player.y + dy,
+                                          vx, vy);
   };
-  active = false;
 }
 
 void ZapSprite::draw(Game *game) {
@@ -48,7 +49,6 @@ void ZapSprite::draw(Game *game) {
 
 void ZapSprite::cleanup(Game *game) {} // no cleanup, since it's always
                                        // overlapped by a tank.
-
 void ZapSprite::move(Game *game) {}
 
 void ZapPixel::draw(Game *game) {
@@ -70,15 +70,11 @@ void ZapPixel::move(Game *game) {
 void ZapPixel::hit(Game *game) {
   game->run = false;
   is_hit = true;
-  auto &tanks = game->tanks;
-  for (int i = 0; i < tanks.size(); i++) {
-    if (tanks[i].check_hit(x, y)) {
-      tanks[!i].score += 1;
-    }
-  }
+  declare_winner(game);
 }
 
 void ZapAimPixel::hit(Game *game) {}
+
 void ZapAimPixel::draw(Game *game) {
   wattron(game->my_win, COLOR_PAIR(7));
   mvwaddch(game->my_win, y, x, '.');

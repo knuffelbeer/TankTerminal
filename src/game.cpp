@@ -1,5 +1,7 @@
-#include "../include/wall.h"
 #include "../include/game.h"
+#include "../include/elements/mine.h"
+#include "../include/elements/rocket.h"
+#include "../include/wall.h"
 #include <memory>
 #include <ncurses.h>
 #include <utility>
@@ -47,6 +49,7 @@ void Game::make_level(int num_level) {
              {'H', 5, level_width - 10, level_width},
              {'H', level_height - 5, level_width - 10, level_width}};
     elements.push_back(std::make_unique<ZapSprite>(5, 5));
+    elements.push_back(std::make_unique<RocketSprite>(10, 15));
   } break;
   case 1: {
     walls = {{'H', 0, 0, level_width},
@@ -57,7 +60,7 @@ void Game::make_level(int num_level) {
              {'V', level_height / 2 + 3, 5, level_width / 3},
              {'H', 5, level_width - 10, level_width},
              {'V', level_width - 10, level_height - 10, level_height}};
-    elements.push_back(std::make_unique<ZapSprite>(5, 5));
+    elements.push_back(std::make_unique<MineSprite>(5, 5));
   } break;
   case 2: {
     walls = {{'H', 0, 0, level_width - 5},

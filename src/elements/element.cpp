@@ -1,5 +1,14 @@
-#include "../../include/game.h"
 #include "../../include/elements/element.h"
+#include "../../include/game.h"
+
+void Element::declare_winner(Game *game) {
+  auto &tanks = game->tanks;
+  for (int i = 0; i < tanks.size(); i++) {
+    if (tanks[i].check_hit(x, y)) {
+      tanks[!i].score += 1;
+    }
+  }
+}
 
 void Element::cleanup(Game *game) {
   for (auto &tank : game->tanks) {
