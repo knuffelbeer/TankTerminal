@@ -76,14 +76,14 @@ ManageGame::ManageGame() {
   curs_set(0);
   keypad(stdscr, TRUE);
   start_color();
-  init_pair(0, COLOR_BLACK, COLOR_BLACK);
-  init_pair(1, COLOR_BLACK, COLOR_RED);
-  init_pair(2, COLOR_BLACK, COLOR_BLUE);
-  init_pair(3, COLOR_GREEN, COLOR_BLACK);
-  init_pair(4, COLOR_GREEN, COLOR_YELLOW);
-  init_pair(5, COLOR_RED, COLOR_BLACK);
-  init_pair(6, COLOR_BLUE, COLOR_BLACK);
-  init_pair(7, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(BLACK_BLACK, COLOR_BLACK, COLOR_BLACK);
+  init_pair(BLACK_RED, COLOR_BLACK, COLOR_RED);
+  init_pair(BLACK_BLUE, COLOR_BLACK, COLOR_BLUE);
+  init_pair(GREEN_BLACK, COLOR_GREEN, COLOR_BLACK);
+  init_pair(GREEN_YELLOW, COLOR_GREEN, COLOR_YELLOW);
+  init_pair(RED_BLACK, COLOR_RED, COLOR_BLACK);
+  init_pair(BLUE_BLACK, COLOR_BLUE, COLOR_BLACK);
+  init_pair(YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
 }
 
 ManageGame::~ManageGame() { endwin(); /* End curses mode		  */ }

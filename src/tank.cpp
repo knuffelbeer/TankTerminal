@@ -14,14 +14,14 @@ std::function<void(Game *game, int, int, int, int)> Tank::normal_shoot =
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
            int color_pair)
     : my_win(my_win), left(left), right(right), up(up), down(down),
-      shoot(shoot), color_pair(color_pair) {
+      shoot_button(shoot), color_pair(color_pair) {
   setup();
 }
 
 Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
            int down, int shoot, int color_pair)
     : my_win(my_win), x(x), y(y), image(image), orientation(image), left(left),
-      right(right), up(up), down(down), shoot(shoot), color_pair(color_pair) {
+      right(right), up(up), down(down), shoot_button(shoot), color_pair(color_pair) {
 
   setup();
 }
@@ -169,7 +169,7 @@ std::function<void(int, Game *)> Tank::normal_move = [](int ch, Game *game) {
   } else if (ch == current_tank.right) {
     current_tank.update_for_move(game, &Tank::l, &Tank::h);
 
-  } else if (ch == current_tank.shoot)
+  } else if (ch == current_tank.shoot_button)
     current_tank.q(game);
 };
 

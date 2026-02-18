@@ -1,6 +1,6 @@
 #pragma once
 #include "elements/element.h"
-#include "ncurses.h"
+#include "renderer.h"
 #include "wall.h"
 #include <functional>
 #include <map>
@@ -38,7 +38,7 @@ private:
 public:
 	int counter{};
   int left, up, down, right;
-  int shoot;
+  int shoot_button;
   void reset();
   void setup();
   int color_pair;

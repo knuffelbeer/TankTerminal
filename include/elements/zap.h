@@ -2,7 +2,7 @@
 
 #include <array>
 #include <iostream>
-#include <ncurses.h>
+#include "../renderer.h"
 #include <vector>
 #include <ncurses.h>
 #include "element.h"

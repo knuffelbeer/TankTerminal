@@ -1,10 +1,11 @@
 #include "../include/game.h"
 #include "../include/elements/mine.h"
+#include "../include/elements/zap.h"
+#include "../include/elements/bullet.h"
 #include "../include/elements/rocket.h"
 #include "../include/wall.h"
 #include <memory>
 #include <ncurses.h>
-#include <utility>
 
 Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
     : Window(width, height, startx, starty), ManageGame_run(ManageGame_run) {

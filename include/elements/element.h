@@ -15,12 +15,12 @@ public:
   virtual void draw(Game *game) {}
   virtual void hit(Game *game) {}
   virtual void cleanup(Game *game);
-	virtual ~Element(){}
+  virtual ~Element() = default;
 
 protected:
   Element(int x, int y);
   Element(int x, int y, int vx, int vy);
 
-	void declare_winner(Game* game);
+  void declare_winner(Game *game);
   static void step(Game *game, int &x, int &y, int &vx, int &vy);
 };

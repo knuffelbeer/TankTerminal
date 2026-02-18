@@ -36,7 +36,7 @@ void ZapSprite::hit(Game *game) {
   player.move = [&player](int ch, Game *game) {
     auto [dx, dy, vx, vy] = Tank::MOVE_Q[player.orientation];
     player.normal_move(ch, game);
-    if (ch != player.shoot)
+    if (ch != player.shoot_button)
       ZapSprite::custom_shot<ZapAimPixel>(game, player.x + dx, player.y + dy,
                                           vx, vy);
   };
@@ -54,9 +54,9 @@ void ZapSprite::move(Game *game) {}
 void ZapPixel::draw(Game *game) {
   if (is_hit)
     return;
-  wattron(game->my_win, COLOR_PAIR(3));
+  wattron(game->my_win, COLOR_PAIR(GREEN_BLACK));
   mvwaddch(game->my_win, y, x, '.');
-  wattroff(game->my_win, COLOR_PAIR(3));
+  wattroff(game->my_win, COLOR_PAIR(GREEN_BLACK));
 }
 
 ZapPixel::ZapPixel(int x, int y) : Element(x, y) {}
@@ -76,8 +76,9 @@ void ZapPixel::hit(Game *game) {
 void ZapAimPixel::hit(Game *game) {}
 
 void ZapAimPixel::draw(Game *game) {
-  wattron(game->my_win, COLOR_PAIR(7));
+  wattron(game->my_win, COLOR_PAIR(YELLOW_BLACK));
   mvwaddch(game->my_win, y, x, '.');
-  wattroff(game->my_win, COLOR_PAIR(7));
+  wattroff(game->my_win, COLOR_PAIR(YELLOW_BLACK));
 }
+
 void ZapAimPixel::move(Game *game) { active = false; }

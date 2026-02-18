@@ -1,5 +1,5 @@
 #pragma once
-#include <ncurses.h>
+#include "renderer.h"
 
 class Window {
 protected:

@@ -15,9 +15,9 @@ void Element::cleanup(Game *game) {
     if (tank.check_hit(x, y))
       return;
   }
-  wattron(game->my_win, 0);
+  wattron(game->my_win, BLACK_BLACK);
   mvwaddch(game->my_win, y, x, ' ');
-  wattroff(game->my_win, 0);
+  wattroff(game->my_win, BLACK_BLACK);
 }
 
 Element::Element(int x, int y) : x(x), y(y) {}
