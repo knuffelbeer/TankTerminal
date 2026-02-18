@@ -7,7 +7,8 @@
 
 std::function<void(Game *game, int, int, int, int)> Tank::normal_shoot =
     [](Game *game, int sx, int sy, int vx, int vy) {
-      game->spawn_bullet(sx, sy, vx, vy);
+      game->spawn_bullet(sx, sy, vx, vy,
+                         game->tanks[game->current_player].counter);
     };
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,

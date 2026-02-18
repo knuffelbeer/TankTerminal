@@ -15,6 +15,7 @@ public:
   virtual void draw(Game *game) {}
   virtual void hit(Game *game) {}
   virtual void cleanup(Game *game);
+	virtual ~Element(){}
 
 protected:
   Element(int x, int y);

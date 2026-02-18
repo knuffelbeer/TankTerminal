@@ -36,6 +36,7 @@ private:
                        void (Tank::*opposite)());
 
 public:
+	int counter{};
   int left, up, down, right;
   int shoot;
   void reset();

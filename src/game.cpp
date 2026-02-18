@@ -89,9 +89,9 @@ void Game::update_bullets() {
   }
 }
 
-void Game::spawn_bullet(int x, int y, int vx, int vy) {
-  bullets.push_back(Bullet(x, y, vx, vy));
-  spawn<Bullet>(x, y, vx, vy);
+void Game::spawn_bullet(int x, int y, int vx, int vy, int &counter) {
+  if (counter < 6)
+    spawn<Bullet>(x, y, vx, vy, counter);
 }
 
 void Game::loop() {

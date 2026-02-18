@@ -1,9 +1,13 @@
 
 #include "../../include/elements/bullet.h"
 #include "../../include/game.h"
+#include <iostream>
+#include <ncurses.h>
 
-Bullet::Bullet(int x, int y, int vx, int vy)
-    : Element(x, y, vx, vy), prev_loc({x, y}) {}
+Bullet::Bullet(int x, int y, int vx, int vy, int &counter)
+    : Element(x, y, vx, vy), prev_loc({x, y}), counter(counter) {
+  counter++;
+}
 
 void Bullet::move(Game *game) {
   if (is_hit)
@@ -19,7 +23,7 @@ void Bullet::move(Game *game) {
 }
 
 void Bullet::draw(Game *game) {
-  if (active ) {
+  if (active) {
     auto [prev_x, prev_y] = prev_loc;
     mvwaddch(game->my_win, prev_y, prev_x, ' ');
     for (auto &tank : game->tanks) {
@@ -41,4 +45,8 @@ void Bullet::hit(Game *game) {
       tanks[!i].score += 1;
     }
   }
+}
+
+Bullet::~Bullet() {
+  counter--;
 }

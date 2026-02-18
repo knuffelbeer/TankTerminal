@@ -33,7 +33,7 @@ public:
   Game(bool &ManageGame_run,int width, int height, int startx, int starty);
   Game(bool &ManageGamerun,int width, int height);
   void make_level(int num_level);
-  void spawn_bullet(int x, int y, int vx, int vy);
+  void spawn_bullet(int x, int y, int vx, int vy, int & counter);
 
   template <typename T, typename... Args>
   T& spawn(int x, int y, Args &&...args) {
