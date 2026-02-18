@@ -43,10 +43,9 @@ void Bullet::hit(Game *game) {
   for (int i = 0; i < tanks.size(); i++) {
     if (tanks[i].check_hit(x, y)) {
       tanks[!i].score += 1;
+      tanks[i].exploded = true;
     }
   }
 }
 
-Bullet::~Bullet() {
-  counter--;
-}
+Bullet::~Bullet() { counter--; }

@@ -8,7 +8,6 @@
 class Game;
 
 class Tank {
-
 private:
   inline static constexpr int MOVE_K[8][2]{
       {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
@@ -26,8 +25,8 @@ private:
     D_LEFT_DOWN,
     D_VERTICAL_DOWN,
     D_RIGHT_DOWN,
-
   };
+
   static const std::map<int, std::vector<std::pair<int, int>>> image_offsets;
   int image{};
   WINDOW *my_win;
@@ -35,8 +34,10 @@ private:
   void update_for_move(Game *game, void (Tank::*move)(),
                        void (Tank::*opposite)());
 
+
 public:
-	int counter{};
+  bool exploded{};
+  int counter{};
   int left, up, down, right;
   int shoot_button;
   void reset();
@@ -67,6 +68,7 @@ public:
   void q(Game *game);
   void draw();
 
+  void animation();
   bool check_move(const std::vector<Wall> &walls);
   void straight_horizontal();
   void straight_vertical();

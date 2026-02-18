@@ -1,8 +1,10 @@
 #include "../include/tank.h"
 #include "../include/game.h"
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <ncurses.h>
+#include <unistd.h>
 #include <vector>
 
 std::function<void(Game *game, int, int, int, int)> Tank::normal_shoot =
@@ -21,11 +23,15 @@ Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
 Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
            int down, int shoot, int color_pair)
     : my_win(my_win), x(x), y(y), image(image), orientation(image), left(left),
-      right(right), up(up), down(down), shoot_button(shoot), color_pair(color_pair) {
+      right(right), up(up), down(down), shoot_button(shoot),
+      color_pair(color_pair) {
 
   setup();
 }
-void Tank::reset() { setup(); }
+void Tank::reset() {
+  exploded = false;
+  setup();
+}
 
 void Tank::setup() {
   custom_shot = normal_shoot;
@@ -78,7 +84,6 @@ void Tank::straight_vertical() {
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 template <typename F> void Tank::for_all_points(F &&fun) {
-  auto amt_rows_tank = {0, 1};
   for (auto [dx, dy] : image_offsets.at(image)) {
     fun(x + dx, y + dy);
   }
@@ -113,7 +118,51 @@ void Tank::draw_color(int color) {
   for_all_points([this](int x, int y) { draw_single_point(x, y); });
   wattroff(my_win, COLOR_PAIR(color));
 }
-void Tank::draw() { draw_color(color_pair); }
+void Tank::draw() {
+  if (!exploded)
+    draw_color(color_pair);
+  else
+    animation();
+}
+
+void Tank::animation() {
+  wattron(my_win, COLOR_PAIR(BLACK_BLACK));
+  for_all_points(
+      [this](int new_x, int new_y) { draw_single_point(new_x, new_y); });
+  wattroff(my_win, COLOR_PAIR(BLACK_BLACK));
+
+  constexpr int amt_explosion_colors = 3;
+  int colors[amt_explosion_colors];
+  colors[0] = color_pair;
+  colors[1] = GREEN_YELLOW;
+  colors[2] = BLACK_ORANGE;
+
+  for (int i = 0; i < 6; i++) {
+
+    for (int j = 0; j < amt_explosion_colors; j++) {
+
+      int radius = i - j;
+
+      if (radius < 0)
+        continue;
+
+      wattron(my_win, COLOR_PAIR(colors[j]));
+
+      for_all_points([this, radius](int new_x, int new_y) {
+        int dx = new_x - x;
+        int dy = new_y - y;
+
+        mvwaddch(my_win, y + radius * dy - radius / 2,
+                 x + radius * dx - radius / 2, ' ');
+      });
+
+      wattroff(my_win, COLOR_PAIR(colors[j]));
+    }
+
+    wrefresh(my_win);
+    usleep(120000);
+  }
+}
 
 bool Tank::check_move(const std::vector<Wall> &walls) {
   bool valid = true;

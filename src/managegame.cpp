@@ -84,6 +84,11 @@ ManageGame::ManageGame() {
   init_pair(RED_BLACK, COLOR_RED, COLOR_BLACK);
   init_pair(BLUE_BLACK, COLOR_BLUE, COLOR_BLACK);
   init_pair(YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(BLACK_WHITE, COLOR_BLACK, COLOR_WHITE);
+  init_pair(WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
+  init_pair(WHITE_WHITE, COLOR_WHITE, COLOR_WHITE);
+  init_color(8, 255, 99, 0);
+  init_pair(BLACK_ORANGE, COLOR_BLACK, 8);
 }
 
 ManageGame::~ManageGame() { endwin(); /* End curses mode		  */ }
