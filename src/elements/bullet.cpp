@@ -40,12 +40,7 @@ void Bullet::hit(Game *game) {
   active = false;
   game->run = false;
   auto &tanks = game->tanks;
-  for (int i = 0; i < tanks.size(); i++) {
-    if (tanks[i].check_hit(x, y)) {
-      tanks[!i].score += 1;
-      tanks[i].exploded = true;
-    }
-  }
+	declare_winner(game);
 }
 
 Bullet::~Bullet() { counter--; }
