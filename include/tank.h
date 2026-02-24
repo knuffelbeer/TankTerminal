@@ -1,7 +1,7 @@
 #pragma once
 #include "elements/element.h"
 #include "renderer.h"
-#include "tank_directions.h"
+#include "tank_constants.h"
 #include "wall.h"
 #include <functional>
 
@@ -10,6 +10,7 @@ class Tank {
 private:
   inline static constexpr std::array<std::array<int, 2>, 8> MOVE_K =
       TankConstants::Move::K;
+
   inline static constexpr std::array<std::array<int, 2>, 8> MOVE_J =
       TankConstants::Move::J;
 
@@ -33,6 +34,7 @@ public:
   int score{};
   int x{}, y{};
   int orientation{};
+
   inline static constexpr std::array<std::array<int, 4>, 8> MOVE_Q =
       TankConstants::Move::Q;
 
