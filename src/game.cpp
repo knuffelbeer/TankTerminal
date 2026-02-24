@@ -1,8 +1,8 @@
 #include "../include/game.h"
-#include "../include/elements/mine.h"
-#include "../include/elements/zap.h"
 #include "../include/elements/bullet.h"
+#include "../include/elements/mine.h"
 #include "../include/elements/rocket.h"
+#include "../include/elements/zap.h"
 #include "../include/wall.h"
 #include <memory>
 #include <ncurses.h>
@@ -32,9 +32,10 @@ void Game::reset() {
 void Game::build() {
   level_height = height - border_height;
   level_width = width;
-  tanks = {
-      Tank(my_win, 10, 10, 0, 'd', 'a', 'w', 's', 'q', 1),
-      Tank(my_win, 25, 5, 0, KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, ' ', 2)};
+  tanks = {Tank(my_win, 10, 10, TankConstants::Direction::HORIZONTAL_LEFT, 'd',
+                'a', 'w', 's', 'q', 1),
+           Tank(my_win, 25, 5, TankConstants::Direction::HORIZONTAL_LEFT,
+                KEY_RIGHT, KEY_LEFT, KEY_UP, KEY_DOWN, ' ', 2)};
   tank_positions = {{10, 10}, {25, 5}};
 }
 

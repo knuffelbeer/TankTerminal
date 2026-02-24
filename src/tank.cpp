@@ -1,6 +1,5 @@
 #include "../include/tank.h"
 #include "../include/game.h"
-#include <algorithm>
 #include <functional>
 #include <memory>
 #include <ncurses.h>
@@ -28,6 +27,7 @@ Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
 
   setup();
 }
+
 void Tank::reset() {
   exploded = false;
   setup();
@@ -84,7 +84,7 @@ void Tank::straight_vertical() {
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 template <typename F> void Tank::for_all_points(F &&fun) {
-  for (auto [dx, dy] : image_offsets.at(image)) {
+  for (auto [dx, dy] : image_offsets[image]) {
     fun(x + dx, y + dy);
   }
 }
@@ -113,11 +113,13 @@ bool Tank::check_and_process_hit(Game *game) {
   }
   return is_hit;
 }
+
 void Tank::draw_color(int color) {
   wattron(my_win, COLOR_PAIR(color));
   for_all_points([this](int x, int y) { draw_single_point(x, y); });
   wattroff(my_win, COLOR_PAIR(color));
 }
+
 void Tank::draw() {
   if (!exploded)
     draw_color(color_pair);
@@ -221,75 +223,3 @@ std::function<void(int, Game *)> Tank::normal_move = [](int ch, Game *game) {
   } else if (ch == current_tank.shoot_button)
     current_tank.q(game);
 };
-
-const std::map<int, std::vector<std::pair<int, int>>> Tank::image_offsets = {
-    {D_HORIZONTAL_RIGHT,
-     {{-2, 0},
-      {-1, 0},
-      {0, 0},
-      {1, 0},
-      {2, 0},
-      {-2, 1},
-      {-1, 1},
-      {0, 1},
-      {1, 1},
-      {2, 1}}},
-    {D_RIGHT_UP,
-     {{-2, 1},
-      {-1, 0},
-      {0, 0},
-      {1, 0},
-      {2, -1},
-      {-2, 2},
-      {-1, 1},
-      {0, 1},
-      {1, 1},
-      {2, 0}}},
-    {D_VERTICAL_UP,
-     {{0, -1}, {0, 0}, {0, 1}, {0, 2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}}},
-    {D_LEFT_UP,
-     {{-2, -0},
-      {-1, 0},
-      {0, 0},
-      {1, 0},
-      {2, 1},
-      {-2, -1},
-      {-1, 1},
-      {0, 1},
-      {1, 1},
-      {2, 2}}},
-    {D_HORIZONTAL_LEFT,
-     {{-2, 0},
-      {-1, 0},
-      {0, 0},
-      {1, 0},
-      {2, 0},
-      {-2, 1},
-      {-1, 1},
-      {0, 1},
-      {1, 1},
-      {2, 1}}},
-    {D_LEFT_DOWN,
-     {{-2, 1},
-      {-1, 0},
-      {0, 0},
-      {1, 0},
-      {2, -0},
-      {-2, 2},
-      {-1, 1},
-      {0, 1},
-      {1, 1},
-      {2, -1}}},
-    {D_VERTICAL_DOWN,
-     {{0, -1}, {0, 0}, {0, 1}, {0, 2}, {1, -1}, {1, 0}, {1, 1}, {1, 2}}},
-    {D_RIGHT_DOWN,
-     {{-2, -0},
-      {-1, 0},
-      {0, 0},
-      {1, 0},
-      {2, 1},
-      {-2, -1},
-      {-1, 1},
-      {0, 1},
-      {1, 1},
-      {2, 2}}}};

@@ -1,39 +1,26 @@
 #pragma once
 #include "elements/element.h"
 #include "renderer.h"
+#include "tank_directions.h"
 #include "wall.h"
 #include <functional>
-#include <map>
-#include <memory>
-class Game;
 
+class Game;
 class Tank {
 private:
-  inline static constexpr int MOVE_K[8][2]{
-      {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
-  };
-  inline static constexpr int MOVE_J[8][2] = {
-      {-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}};
+  inline static constexpr std::array<std::array<int, 2>, 8> MOVE_K =
+      TankConstants::Move::K;
+  inline static constexpr std::array<std::array<int, 2>, 8> MOVE_J =
+      TankConstants::Move::J;
 
-  enum Direction {
+  inline static constexpr std::array<std::span<const TankConstants::Vec2>, 8>
+      image_offsets = TankConstants::IMAGE_OFFSETS;
 
-    D_HORIZONTAL_RIGHT,
-    D_RIGHT_UP,
-    D_VERTICAL_UP,
-    D_LEFT_UP,
-    D_HORIZONTAL_LEFT,
-    D_LEFT_DOWN,
-    D_VERTICAL_DOWN,
-    D_RIGHT_DOWN,
-  };
-
-  static const std::map<int, std::vector<std::pair<int, int>>> image_offsets;
   int image{};
   WINDOW *my_win;
   void draw_color(int color);
   void update_for_move(Game *game, void (Tank::*move)(),
                        void (Tank::*opposite)());
-
 
 public:
   bool exploded{};
@@ -46,9 +33,9 @@ public:
   int score{};
   int x{}, y{};
   int orientation{};
-  inline static constexpr int MOVE_Q[8][4] = {
-      {3, 0, 1, 0},    {3, -2, 1, -1}, {0, -3, 0, -1}, {-3, -2, -1, -1},
-      {-3, 0, -1, -0}, {-3, 2, -1, 1}, {0, 3, 0, 1},   {3, 3, 1, 1}};
+  inline static constexpr std::array<std::array<int, 4>, 8> MOVE_Q =
+      TankConstants::Move::Q;
+
   char fire_element = 'B';
   Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
        int color_pair);

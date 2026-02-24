@@ -37,6 +37,7 @@ void Rocket::move(Game *game) {
 void Rocket::hit(Game *game) {
   game->run = false;
   active = false;
+  declare_winner(game);
 }
 
 void Rocket::draw(Game *game) {
