@@ -18,8 +18,10 @@ Start the game:
 `./TankTerminal`
 
 Dependencies:
+
     to run:
         ncurses
+
 
     to install:
         cmake 
