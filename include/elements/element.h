@@ -17,6 +17,12 @@ public:
   virtual void cleanup(Game *game);
   virtual ~Element() = default;
 
+  Element(const Element &) = delete;
+  Element &operator=(const Element &) = delete;
+
+  Element(Element &&) noexcept = default;
+  Element &operator=(Element &&) noexcept = default;
+
 protected:
   Element(int x, int y);
   Element(int x, int y, int vx, int vy);

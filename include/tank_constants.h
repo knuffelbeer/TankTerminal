@@ -114,7 +114,6 @@ constexpr std::array<Vec2, 10> RIGHT_DOWN = {{{-2, -0},
                                               {1, 1},
                                               {2, 2}}};
 } // namespace Array
-
 constexpr std::array<std::span<const Vec2>, 8> IMAGE_OFFSETS = {
     Array::HORIZONTAL_RIGHT, Array::RIGHT_UP,        Array::VERTICAL_UP,
     Array::LEFT_UP,          Array::HORIZONTAL_LEFT, Array::LEFT_DOWN,

@@ -4,12 +4,12 @@
 #include <memory>
 #include <ncurses.h>
 #include <unistd.h>
+#include <variant>
 #include <vector>
 
 std::function<void(Game *game, int, int, int, int)> Tank::normal_shoot =
     [](Game *game, int sx, int sy, int vx, int vy) {
-      game->spawn_bullet(sx, sy, vx, vy,
-                         game->tanks[game->current_player].counter);
+      game->spawn_bullet(sx, sy, vx, vy);
     };
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
@@ -84,7 +84,7 @@ void Tank::straight_vertical() {
 
 void Tank::draw_single_point(int x, int y) { mvwaddch(my_win, y, x, ' '); }
 template <typename F> void Tank::for_all_points(F &&fun) {
-  for (auto [dx, dy] : image_offsets[image]) {
+  for (const auto [dx, dy] : image_offsets[image]) {
     fun(x + dx, y + dy);
   }
 }
@@ -101,15 +101,20 @@ bool Tank::check_hit(int other_x, int other_y) {
 bool Tank::check_and_process_hit(Game *game) {
   bool is_hit = false;
   for (auto &b : game->elements) {
-    bool hit = false;
-    for_all_points([&b, &hit, &is_hit](int x, int y) {
-      if (x == b->x && y == b->y)
-        hit = true;
-      is_hit = true;
-    });
-    if (hit) {
-      b->hit(game);
-    }
+    std::visit(
+        [this, &is_hit, game](auto &b) {
+          // if constexpr (std::is_same_v<std::decay_t<decltype(b)>, Bullet>) {
+          bool hit = false;
+          for_all_points([&b, &hit, &is_hit](int x, int y) {
+            if (x == b.x && y == b.y)
+              hit = true;
+            is_hit = true;
+          });
+          if (hit) {
+            b.hit(game);
+          }
+        },
+        b);
   }
   return is_hit;
 }

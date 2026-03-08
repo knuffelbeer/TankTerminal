@@ -8,14 +8,14 @@
 class Game;
 class Tank {
 private:
-  inline static constexpr std::array<std::array<int, 2>, 8> MOVE_K =
+  inline static constexpr const auto &MOVE_K =
       TankConstants::Move::K;
 
-  inline static constexpr std::array<std::array<int, 2>, 8> MOVE_J =
+  inline static constexpr const auto &MOVE_J =
       TankConstants::Move::J;
 
-  inline static constexpr std::array<std::span<const TankConstants::Vec2>, 8>
-      image_offsets = TankConstants::IMAGE_OFFSETS;
+  inline static constexpr const auto &image_offsets =
+      TankConstants::IMAGE_OFFSETS;
 
   int image{};
   WINDOW *my_win;
@@ -25,7 +25,7 @@ private:
 
 public:
   bool exploded{};
-  int counter{};
+  // int counter{};
   int left, up, down, right;
   int shoot_button;
   void reset();
@@ -35,7 +35,7 @@ public:
   int x{}, y{};
   int orientation{};
 
-  inline static constexpr std::array<std::array<int, 4>, 8> MOVE_Q =
+  inline static constexpr const auto& MOVE_Q =
       TankConstants::Move::Q;
 
   char fire_element = 'B';

@@ -2,6 +2,7 @@
 #include "../../include/game.h"
 #include "../../include/tank.h"
 #include <ncurses.h>
+#include <variant>
 
 Rocket::Rocket(int x, int y, int vx, int vy, int player)
     : Element(x, y, vx, vy), player(player) {}
@@ -56,7 +57,7 @@ void RocketSprite::hit(Game *game) {
   tank.custom_shot = [&tank](Game *game, int x, int y, int vx, int vy) {
     auto [x_displacement, y_distplacement, new_vx, new_vy] =
         Tank::MOVE_Q[tank.orientation];
-    Rocket &rocket =
+    auto &rocket =
         game->spawn<Rocket>(x, y, new_vx, new_vy, game->current_player);
     tank.move = [&tank, &rocket](int ch, Game *game) {
       rocket.adjust_dir(game, tank, ch);

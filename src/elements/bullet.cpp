@@ -1,12 +1,14 @@
-
 #include "../../include/elements/bullet.h"
 #include "../../include/game.h"
 #include <iostream>
 #include <ncurses.h>
+#include <utility>
 
-Bullet::Bullet(int x, int y, int vx, int vy, int &counter)
-    : Element(x, y, vx, vy), prev_loc({x, y}), counter(counter) {
-  counter++;
+std::array<int, 2> Bullet::counter{};
+Bullet::Bullet(int x, int y, int vx, int vy, int player)
+    : Element(x, y, vx, vy), prev_loc({x, y}), player(player) {
+  personal_counter = &counter[player];
+  (*personal_counter)++;
 }
 
 void Bullet::move(Game *game) {
@@ -40,7 +42,34 @@ void Bullet::hit(Game *game) {
   active = false;
   game->run = false;
   auto &tanks = game->tanks;
-	declare_winner(game);
+  declare_winner(game);
 }
 
-Bullet::~Bullet() { counter--; }
+Bullet::~Bullet() {
+  if (personal_counter == nullptr)
+    return;
+	(*personal_counter)--;
+}
+Bullet::Bullet(Bullet &&other)
+    : Element(std::move(other)),
+      personal_counter(std::exchange(other.personal_counter, nullptr)),
+      player(other.player), prev_loc(other.prev_loc) {}
+Bullet& Bullet::operator=(Bullet&& other) noexcept {
+    if (this != &other) {
+
+        // 1️⃣ Release any counter this object already owns
+        if (personal_counter)
+            (*personal_counter)--;
+
+        // 2️⃣ Move the base class part
+        Element::operator=(std::move(other));
+
+        // 3️⃣ Take ownership of the counter from the other object
+        personal_counter = std::exchange(other.personal_counter, nullptr);
+
+        // 4️⃣ Move or copy other members
+        player = other.player;
+        prev_loc = other.prev_loc;
+    }
+    return *this;
+}

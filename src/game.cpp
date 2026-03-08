@@ -4,11 +4,12 @@
 #include "../include/elements/rocket.h"
 #include "../include/elements/zap.h"
 #include "../include/wall.h"
-#include <memory>
 #include <ncurses.h>
+#include <variant>
 
 Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
     : Window(width, height, startx, starty), ManageGame_run(ManageGame_run) {
+elements.reserve(100);
   build();
 }
 
@@ -19,7 +20,8 @@ Game::Game(bool &ManageGame_run, int width, int height)
 void Game::reset() {
   wclear(my_win);
   run = true;
-  elements.erase(elements.begin(), elements.end());
+  elements.clear();
+  elements.reserve(100);
   for (int i = 0; i < tanks.size(); i++) {
     auto &tank = tanks[i];
     tank.reset();
@@ -50,8 +52,8 @@ void Game::make_level(int num_level) {
              {'H', level_height / 2 + 3, 5, level_width / 3},
              {'H', 5, level_width - 10, level_width},
              {'H', level_height - 5, level_width - 10, level_width}};
-    elements.push_back(std::make_unique<ZapSprite>(5, 5));
-    elements.push_back(std::make_unique<RocketSprite>(10, 15));
+    elements.emplace_back(ZapSprite{5, 5});
+    elements.emplace_back(RocketSprite{10, 15});
   } break;
   case 1: {
     walls = {{'H', 0, 0, level_width},
@@ -62,7 +64,7 @@ void Game::make_level(int num_level) {
              {'V', level_height / 2 + 3, 5, level_width / 3},
              {'H', 5, level_width - 10, level_width},
              {'V', level_width - 10, level_height - 10, level_height}};
-    elements.push_back(std::make_unique<MineSprite>(5, 5));
+    elements.emplace_back(MineSprite{5, 5});
   } break;
   case 2: {
     walls = {{'H', 0, 0, level_width - 5},
@@ -73,27 +75,47 @@ void Game::make_level(int num_level) {
              {'V', 20, 5, level_height - 10},
              {'H', 5, 10, 20},
              {'V', level_width - 15, level_height - 10, level_height}};
-    elements.push_back(std::make_unique<ZapSprite>(8, 7));
+    elements.emplace_back(ZapSprite{8, 7});
   } break;
   }
 }
 
 void Game::update_bullets() {
   for (int i = 0; i < elements.size();) {
-    if (!elements[i]->active) {
-      elements[i]->cleanup(this);
+    bool del{};
+    std::visit(
+        [this, &del](auto &element) {
+          if (!element.active) {
+            element.cleanup(this);
+            del = true;
+          } else {
+            element.move(this);
+            element.draw(this);
+          }
+        },
+        elements[i]);
+
+    if (del)
       elements.erase(elements.begin() + i);
-    } else {
-      elements[i]->move(this);
-      elements[i]->draw(this);
+    else
       i++;
-    }
   }
+
+  // 				}, elements[i]);
+  // if (!elements[i]->active) {
+  //   elements[i]->cleanup(this);
+  //   elements.erase(elements.begin() + i);
+  // } else {
+  //   elements[i]->move(this);
+  //   elements[i]->draw(this);
+  //   i++;
+  // }
+  // }
 }
 
-void Game::spawn_bullet(int x, int y, int vx, int vy, int &counter) {
-  if (counter < 6)
-    spawn<Bullet>(x, y, vx, vy, counter);
+void Game::spawn_bullet(int x, int y, int vx, int vy) {
+  if (Bullet::counter[current_player] < 6)
+    spawn<Bullet>(x, y, vx, vy, current_player);
 }
 
 void Game::loop() {

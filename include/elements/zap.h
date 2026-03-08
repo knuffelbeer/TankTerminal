@@ -1,22 +1,22 @@
 #pragma once
 
+#include "../renderer.h"
+#include "element.h"
 #include <array>
 #include <iostream>
-#include "../renderer.h"
-#include <vector>
 #include <ncurses.h>
-#include "element.h"
+#include <vector>
 
 class Game;
 
 class ZapSprite : public Element {
-  void move(Game *game) override;
-  void draw(Game *game) override;
-  void hit(Game *game) override;
   template <typename T>
   static void custom_shot(Game *game, int x, int y, int vx, int vy);
 
 public:
+  void move(Game *game) override;
+  void draw(Game *game) override;
+  void hit(Game *game) override;
   void cleanup(Game *game) override;
   bool fire = false;
   ZapSprite(int x, int y);
@@ -41,4 +41,3 @@ public:
   void draw(Game *game) override;
   void move(Game *game) override;
 };
-
