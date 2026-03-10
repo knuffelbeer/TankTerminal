@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 4.2)
 project(TankTerminal)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,6 +17,6 @@ endif()
 add_executable(TankTerminal src/app.cpp)
 add_subdirectory(src)
 target_link_libraries(TankTerminal PRIVATE Curses::Curses)
-target_compile_options(TankTerminal PRIVATE -g
+target_compile_options(TankTerminal PRIVATE -g -O0
 )
 

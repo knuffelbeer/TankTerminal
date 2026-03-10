@@ -3,12 +3,8 @@
 #include "../include/elements/mine.h"
 #include "../include/elements/rocket.h"
 #include "../include/elements/zap.h"
-#include "renderer.h"
 #include "tank.h"
 #include "window.h"
-#include <algorithm>
-#include <iostream>
-#include <memory>
 #include <unistd.h>
 #include <utility>
 #include <variant>
@@ -40,7 +36,8 @@ public:
 
   template <typename T, typename... Args>
   T &spawn(int x, int y, Args &&...args) {
-    elements.emplace_back(std::in_place_type<T>,x, y, std::forward<Args>(args)...);
+    elements.emplace_back(std::in_place_type<T>, x, y,
+                          std::forward<Args>(args)...);
     return std::get<T>(elements.back());
   }
   void reset();

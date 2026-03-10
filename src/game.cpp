@@ -9,7 +9,7 @@
 
 Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
     : Window(width, height, startx, starty), ManageGame_run(ManageGame_run) {
-elements.reserve(100);
+  elements.reserve(100);
   build();
 }
 
@@ -17,6 +17,7 @@ Game::Game(bool &ManageGame_run, int width, int height)
     : Window(width, height), ManageGame_run(ManageGame_run) {
   build();
 }
+
 void Game::reset() {
   wclear(my_win);
   run = true;
@@ -100,17 +101,6 @@ void Game::update_bullets() {
     else
       i++;
   }
-
-  // 				}, elements[i]);
-  // if (!elements[i]->active) {
-  //   elements[i]->cleanup(this);
-  //   elements.erase(elements.begin() + i);
-  // } else {
-  //   elements[i]->move(this);
-  //   elements[i]->draw(this);
-  //   i++;
-  // }
-  // }
 }
 
 void Game::spawn_bullet(int x, int y, int vx, int vy) {
