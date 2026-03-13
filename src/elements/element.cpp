@@ -4,7 +4,7 @@
 void Element::declare_winner(Game *game) {
   auto &tanks = game->tanks;
   for (int i = 0; i < tanks.size(); i++) {
-    if (tanks[i].check_hit(x, y)) {
+    if (tanks[i].is_hit(x, y)) {
       tanks[!i].score += 1;
 			tanks[i].exploded = true;
     }
@@ -13,7 +13,7 @@ void Element::declare_winner(Game *game) {
 
 void Element::cleanup(Game *game) {
   for (auto &tank : game->tanks) {
-    if (tank.check_hit(x, y))
+    if (tank.is_hit(x, y))
       return;
   }
   wattron(game->my_win, BLACK_BLACK);

@@ -1,7 +1,6 @@
- #include "../include/tank.h"
+#include "../include/tank.h"
 #include "../include/game.h"
 #include <functional>
-#include <memory>
 #include <ncurses.h>
 #include <unistd.h>
 #include <variant>
@@ -89,34 +88,29 @@ template <typename F> void Tank::for_all_points(F &&fun) {
   }
 }
 
-bool Tank::check_hit(int other_x, int other_y) {
-  bool is_hit = false;
-  for_all_points([&is_hit, other_x, other_y](int x, int y) {
+bool Tank::is_hit(int other_x, int other_y) {
+  bool hit = false;
+  for_all_points([&hit, other_x, other_y](int x, int y) {
     if (x == other_x && y == other_y)
-      is_hit = true;
+      hit = true;
   });
-  return is_hit;
+  return hit;
 }
 
 bool Tank::check_and_process_hit(Game *game) {
-  bool is_hit = false;
+  bool hit = false;
   for (auto &b : game->elements) {
     std::visit(
-        [this, &is_hit, game](auto &b) {
-          // if constexpr (std::is_same_v<std::decay_t<decltype(b)>, Bullet>) {
-          bool hit = false;
-          for_all_points([&b, &hit, &is_hit](int x, int y) {
+        [this, &hit, game](auto &b) {
+          for_all_points([&b, &hit, game](int x, int y) {
             if (x == b.x && y == b.y)
-              hit = true;
-            is_hit = true;
+              b.hit(game);
+            hit = true;
           });
-          if (hit) {
-            b.hit(game);
-          }
         },
         b);
   }
-  return is_hit;
+  return hit;
 }
 
 void Tank::draw_color(int color) {

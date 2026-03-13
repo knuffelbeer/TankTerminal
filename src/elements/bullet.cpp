@@ -29,7 +29,7 @@ void Bullet::draw(Game *game) {
     auto [prev_x, prev_y] = prev_loc;
     mvwaddch(game->my_win, prev_y, prev_x, ' ');
     for (auto &tank : game->tanks) {
-      if (tank.check_hit(x, y)) {
+      if (tank.is_hit(x, y)) {
         return;
       }
     }

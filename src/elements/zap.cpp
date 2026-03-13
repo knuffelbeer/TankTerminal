@@ -14,7 +14,7 @@ void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
   for (int i = 0; i < T::range; i++) {
     step(game, x, y, vx, vy);
     for (auto &t : game->tanks) {
-      if (t.check_hit(x, y)) {
+      if (t.is_hit(x, y)) {
         if constexpr (std::is_same_v<T, ZapPixel>) {
           game->spawn<T>(x, y);
         }

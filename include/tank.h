@@ -45,7 +45,7 @@ public:
        int down, int shoot, int color_pair);
   void update(Game *game, int ch, bool &run);
   bool check_and_process_hit(Game *game);
-  bool check_hit(int other_x, int other_y);
+  bool is_hit(int other_x, int other_y);
   void l();
   void h();
   void k();

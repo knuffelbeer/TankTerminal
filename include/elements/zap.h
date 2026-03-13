@@ -1,11 +1,7 @@
 #pragma once
 
-#include "../renderer.h"
 #include "element.h"
-#include <array>
-#include <iostream>
 #include <ncurses.h>
-#include <vector>
 
 class Game;
 
