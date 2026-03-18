@@ -34,6 +34,7 @@ class Reader {
 
 public:
   int length;
+	int message_type;
   Reader();
 
   template <typename T> T read_single() {

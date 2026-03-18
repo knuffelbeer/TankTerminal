@@ -46,6 +46,7 @@ int Reader::make_buf(int start, int socket) {
   idx = 0;
   Message m = read_single<Message>();
   length = m.size;
+	message_type = m.type;
   printf("message recieved. num_bytes=%i m.size=%i, mtype=%i\n", num_bytes,
          m.size, m.type);
   if (length > BUFFERSIZE) {

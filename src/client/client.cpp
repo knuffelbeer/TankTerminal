@@ -1,4 +1,5 @@
 #include "../../include/client/reader.h"
+#include "../../include/server/wall.h"
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -19,7 +20,6 @@
 #define PORT "9034" // the port client will be connecting to
 
 #define BUFFERSIZE 1000
-
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa) {
@@ -88,22 +88,49 @@ int main(int argc, char *argv[]) {
     start = reader.make_buf(start, sockfd);
     printf("start: %i\n", start);
     std::cout << "reader_length" << reader.length << '\n';
-    std::array<TankLayout, 2> tanks = reader.read<TankLayout, 2>();
-    if ((reader.length - num_tank_bytes - num_message_bytes) %
-            sizeof(Position) !=
-        0) {
-      printf("not an interger number of positions\n");
-    }
+    std::cout << "message_type" << reader.message_type << '\n';
+    switch (reader.message_type) {
 
-    std::vector<Position> positions = reader.read<Position>(
-        (reader.length - num_tank_bytes - num_message_bytes) /
-        sizeof(Position));
-    for (const auto &t : tanks) {
-      std::cout << "tank: x: " << t.x << " y: " << t.y << '\n';
-    }
+    case 0: {
 
-    for (const auto &e : positions)
-      std::cout << "x: " << e.x << " y: " << e.y << "type" << e.type_idx <<'\n';
+      std::array<TankLayout, 2> tanks = reader.read<TankLayout, 2>();
+      if ((reader.length - num_tank_bytes - num_message_bytes) %
+              sizeof(Position) !=
+          0) {
+        printf("not an interger number of positions\n");
+      }
+
+      std::vector<Position> positions = reader.read<Position>(
+          (reader.length - num_tank_bytes - num_message_bytes) /
+          sizeof(Position));
+      for (const auto &t : tanks) {
+        std::cout << "tank: x: " << t.x << " y: " << t.y << '\n';
+      }
+
+      for (const auto &e : positions)
+        std::cout << "x: " << e.x << " y: " << e.y << "type" << e.type_idx
+                  << '\n';
+      break;
+    }
+    case 1: {
+      if ((reader.length - num_message_bytes) % sizeof(Wall) != 0) {
+        printf("not integer number of walls!");
+      }
+      std::vector<Wall> walls =
+          reader.read<Wall>((reader.length - num_message_bytes) / sizeof(Wall));
+      for (const auto &w : walls) {
+
+        std::cout << "wall dir: " << (char)w.direction << ' ' << w.loc << ' ' << w.start << ' '
+                  << w.stop << '\n';
+      }
+
+      break;
+    }
+    default: {
+      printf("message not valid! message: %i %i", reader.length,
+             reader.message_type);
+    }
+    }
     reader.swap_buffer();
   }
 

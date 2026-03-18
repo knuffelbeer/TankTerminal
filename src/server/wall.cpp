@@ -1,7 +1,7 @@
 #include "../../include/server/wall.h"
 #include <ncurses.h>
-void Wall::draw(WINDOW *my_win) {
 
+void Wall::draw(WINDOW *my_win) {
   wattron(my_win, COLOR_PAIR(WHITE_BLACK));
   if (direction == 'H')
     mvwhline(my_win, loc, start, '-', stop - start);

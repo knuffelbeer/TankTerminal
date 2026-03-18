@@ -1,10 +1,10 @@
 #include "../../include/server/game.h"
+#include "../../include/server/buffer.h"
 #include "../../include/server/elements/bullet.h"
 #include "../../include/server/elements/mine.h"
 #include "../../include/server/elements/rocket.h"
 #include "../../include/server/elements/zap.h"
 #include "../../include/server/wall.h"
-#include "../../include/server/buffer.h"
 #include <ncurses.h>
 #include <variant>
 #include <vector>
@@ -110,14 +110,24 @@ void Game::spawn_bullet(int x, int y, int vx, int vy) {
     spawn<Bullet>(x, y, vx, vy, current_player);
 }
 
-
 void Game::loop() {
+  bool walls_drawn{};
   while (run) {
     if (!server.connections_ready) {
       server.listen_for_connections();
       continue;
     }
     ch = getch();
+    if (!walls_drawn) {
+      auto wall_buffer = Buffer<500>();
+      int size_msg = (int)sizeof(Message) + (int)sizeof(Wall) * walls.size();
+      wall_buffer.add(Message{size_msg, 1});
+      for (Wall w : walls) {
+        wall_buffer.add(w);
+      }
+      server.iteration(wall_buffer.data, wall_buffer.get_num_bytes());
+      walls_drawn = true;
+    }
     for (Wall w : walls) {
       w.draw(my_win);
     }

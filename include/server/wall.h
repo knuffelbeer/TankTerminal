@@ -2,7 +2,7 @@
 #include "renderer.h"
 
 struct Wall {
-  char direction;
+  int direction;
   int loc;
   int start;
   int stop;
