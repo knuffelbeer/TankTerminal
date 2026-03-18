@@ -1,4 +1,4 @@
-target_sources(TankTerminal PRIVATE
+target_sources(server PRIVATE
 	wall.cpp
 	window.cpp
 	tank.cpp

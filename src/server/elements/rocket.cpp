@@ -1,11 +1,10 @@
-#include "../../include/elements/rocket.h"
-#include "../../include/game.h"
-#include "../../include/tank.h"
+#include "../../../include/server/elements/rocket.h"
+#include "../../../include/server/game.h"
+#include "../../../include/server/tank.h"
 #include <ncurses.h>
-#include <variant>
 
 Rocket::Rocket(int x, int y, int vx, int vy, int player)
-    : Element(x, y, vx, vy), player(player) {}
+    : Element(x, y, ROCKET_TYPE,vx, vy), player(player) {}
 void Rocket::adjust_dir(Game *game, Tank &tank, int ch) {
   if (ch == tank.left) {
     if (vx < 1)
@@ -49,7 +48,7 @@ void Rocket::draw(Game *game) {
   }
 }
 
-RocketSprite::RocketSprite(int x, int y) : Element(x, y) {}
+RocketSprite::RocketSprite(int x, int y) : Element(x, y,ROCKET_SPRITE_TYPE) {}
 void RocketSprite::hit(Game *game) {
   active = false;
 

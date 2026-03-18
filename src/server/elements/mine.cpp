@@ -1,10 +1,9 @@
-#include "../../include/elements/mine.h"
-#include "../../include/game.h"
-#include <ncurses.h>
-// #include <ncurses.h>
+#include "../../../include/server/elements/mine.h"
+#include "../../../include/server/game.h"
+#include "../../../include/server/renderer.h"
 
-Mine::Mine(int x, int y) : Element(x, y) {}
-MineSprite::MineSprite(int x, int y) : Element(x, y) {}
+Mine::Mine(int x, int y) : Element(x, y, MINE_TYPE) {}
+MineSprite::MineSprite(int x, int y) : Element(x, y, MINE_SPRITE_TYPE) {}
 
 void Mine::hit(Game *game) {
   game->run = false;

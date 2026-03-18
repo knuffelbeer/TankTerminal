@@ -1,4 +1,4 @@
-#include "../include/wall.h"
+#include "../../include/server/wall.h"
 #include <ncurses.h>
 void Wall::draw(WINDOW *my_win) {
 

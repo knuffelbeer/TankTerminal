@@ -1,8 +1,9 @@
 #pragma once
-#include "../include/elements/bullet.h"
-#include "../include/elements/mine.h"
-#include "../include/elements/rocket.h"
-#include "../include/elements/zap.h"
+#include "elements/bullet.h"
+#include "elements/mine.h"
+#include "elements/rocket.h"
+#include "server.h"
+#include "elements/zap.h"
 #include "tank.h"
 #include "window.h"
 #include <unistd.h>
@@ -15,6 +16,7 @@ class Game : public Window {
   void update_bullets();
   void draw_bullets();
   bool &ManageGame_run;
+	Server server = Server();
 
 public:
   std::vector<std::array<int, 2>> tank_positions;
@@ -26,9 +28,7 @@ public:
   int current_player = 0;
   std::vector<Wall> walls;
   std::vector<Tank> tanks;
-  using Var = std::variant<Bullet, Rocket, RocketSprite, ZapPixel, ZapAimPixel,
-                           ZapSprite, MineSprite, Mine>;
-  std::vector<Var> elements;
+  std::vector<std::variant<ELEMENT_TYPES>> elements;
   Game(bool &ManageGame_run, int width, int height, int startx, int starty);
   Game(bool &ManageGamerun, int width, int height);
   void make_level(int num_level);

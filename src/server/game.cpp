@@ -1,11 +1,13 @@
-#include "../include/game.h"
-#include "../include/elements/bullet.h"
-#include "../include/elements/mine.h"
-#include "../include/elements/rocket.h"
-#include "../include/elements/zap.h"
-#include "../include/wall.h"
+#include "../../include/server/game.h"
+#include "../../include/server/elements/bullet.h"
+#include "../../include/server/elements/mine.h"
+#include "../../include/server/elements/rocket.h"
+#include "../../include/server/elements/zap.h"
+#include "../../include/server/wall.h"
+#include "../../include/server/buffer.h"
 #include <ncurses.h>
 #include <variant>
+#include <vector>
 
 Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
     : Window(width, height, startx, starty), ManageGame_run(ManageGame_run) {
@@ -108,11 +110,13 @@ void Game::spawn_bullet(int x, int y, int vx, int vy) {
     spawn<Bullet>(x, y, vx, vy, current_player);
 }
 
+
 void Game::loop() {
-  for (Tank &t : tanks) {
-    t.draw();
-  }
   while (run) {
+    if (!server.connections_ready) {
+      server.listen_for_connections();
+      continue;
+    }
     ch = getch();
     for (Wall w : walls) {
       w.draw(my_win);
@@ -127,6 +131,38 @@ void Game::loop() {
       ManageGame_run = false;
       break;
     }
+    auto buf = Buffer<500>();
+    int size_msg = (int)sizeof(Message) + 2 * (int)sizeof(TankLayout);
+
+    for (const auto &el : elements) {
+      std::visit(
+          [&size_msg](const auto &obj) {
+            Position pos_temp = obj;
+            if (obj.active) {
+              size_msg += (int)sizeof(Position);
+            }
+          },
+          el);
+    }
+    buf.add(Message{size_msg, 0});
+    for (const auto &tank : tanks) {
+      buf.add((TankLayout)tank);
+    }
+    for (int i = 0; const auto &el : elements) {
+      std::visit(
+          [&buf, &i, &size_msg](const auto &obj) {
+            Position pos_temp = obj;
+            if (obj.active) {
+              buf.add(pos_temp);
+            }
+          },
+          el);
+    }
+    if (buf.get_num_bytes() != size_msg) {
+      printf("message size is corrupt! size_msg: %i, get_num_bytes(): %i",
+             size_msg, buf.get_num_bytes());
+    }
+    server.iteration(buf.data, buf.get_num_bytes());
     wrefresh(my_win);
     usleep(DELTA_MS);
   }

@@ -1,13 +1,8 @@
-#include "../../include/elements/zap.h"
-#include "../../include/game.h"
+#include "../../../include/server/elements/zap.h"
+#include "../../../include/server/game.h"
 
-/*
- * The ZapSprite activates the special. the ZapPixel's get shot when firing the
- * special, and the ZapAimPixel's get displaid when aiming.
- * they all inherit from Element, and thus can be updated by the game loop.
- * */
-
-ZapSprite::ZapSprite(int x, int y) : Element(x, y) {}
+ZapAimPixel::ZapAimPixel(int x, int y) : Element(x, y, ZAP_AIM_PIXEL_TYPE) {};
+ZapSprite::ZapSprite(int x, int y) : Element(x, y, ZAP_SPRITE_TYPE) {}
 
 template <typename T>
 void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
@@ -59,7 +54,7 @@ void ZapPixel::draw(Game *game) {
   wattroff(game->my_win, COLOR_PAIR(GREEN_BLACK));
 }
 
-ZapPixel::ZapPixel(int x, int y) : Element(x, y) {}
+ZapPixel::ZapPixel(int x, int y) : Element(x, y, ZAP_PIXEL_TYPE) {}
 
 void ZapPixel::move(Game *game) {
   t++;

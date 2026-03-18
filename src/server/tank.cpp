@@ -1,5 +1,5 @@
-#include "../include/tank.h"
-#include "../include/game.h"
+#include "../../include/server/tank.h"
+#include "../../include/server/game.h"
 #include <functional>
 #include <ncurses.h>
 #include <unistd.h>
@@ -13,16 +13,15 @@ std::function<void(Game *game, int, int, int, int)> Tank::normal_shoot =
 
 Tank::Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
            int color_pair)
-    : my_win(my_win), left(left), right(right), up(up), down(down),
-      shoot_button(shoot), color_pair(color_pair) {
+    : TankLayout{0, 0, 0, color_pair}, my_win(my_win), left(left), right(right),
+      up(up), down(down), shoot_button(shoot) {
   setup();
 }
 
 Tank::Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
            int down, int shoot, int color_pair)
-    : my_win(my_win), x(x), y(y), image(image), orientation(image), left(left),
-      right(right), up(up), down(down), shoot_button(shoot),
-      color_pair(color_pair) {
+    : TankLayout{x, y, image, color_pair}, my_win(my_win), image(image),
+      left(left), right(right), up(up), down(down), shoot_button(shoot) {
 
   setup();
 }

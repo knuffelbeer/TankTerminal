@@ -1,12 +1,16 @@
-#include "../../include/elements/element.h"
-#include "../../include/game.h"
+#include "../../../include/server/elements/element.h"
+#include "../../../include/server/game.h"
+
+Element::Element(int x, int y, int type_name) : Position{x, y, type_name} {}
+Element::Element(int x, int y, int type_name, int vx, int vy)
+    : Position{x, y, type_name}, vx(vx), vy(vy) {}
 
 void Element::declare_winner(Game *game) {
   auto &tanks = game->tanks;
   for (int i = 0; i < tanks.size(); i++) {
     if (tanks[i].is_hit(x, y)) {
       tanks[!i].score += 1;
-			tanks[i].exploded = true;
+      tanks[i].exploded = true;
     }
   }
 }
@@ -21,8 +25,6 @@ void Element::cleanup(Game *game) {
   wattroff(game->my_win, BLACK_BLACK);
 }
 
-Element::Element(int x, int y) : x(x), y(y) {}
-Element::Element(int x, int y, int vx, int vy) : x(x), y(y), vx(vx), vy(vy) {}
 void Element::step(Game *game, int &x, int &y, int &vx, int &vy) {
   bool flipped_x{}, flipped_y{};
   for (auto w : game->walls) {

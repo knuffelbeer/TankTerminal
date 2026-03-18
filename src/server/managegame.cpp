@@ -1,4 +1,4 @@
-#include "../include/managegame.h"
+#include "../../include/server/managegame.h"
 #include <ncurses.h>
 
 void ManageGame::run() {

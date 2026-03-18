@@ -1,5 +1,5 @@
 #pragma once
-#include "../../include/elements/element.h"
+#include "element.h"
 #include <array>
 
 class Game;

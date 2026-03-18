@@ -1,4 +1,4 @@
-#include "../include/managegame.h"
+#include "../../include/server/managegame.h"
 
 int main(int argc, char *argv[]) {
   auto m = ManageGame();

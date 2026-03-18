@@ -6,7 +6,7 @@
 #include <functional>
 
 class Game;
-class Tank {
+class Tank : public TankLayout{
 private:
   inline static constexpr const auto &MOVE_K =
       TankConstants::Move::K;
@@ -25,15 +25,11 @@ private:
 
 public:
   bool exploded{};
-  // int counter{};
   int left, up, down, right;
   int shoot_button;
   void reset();
   void setup();
-  int color_pair;
   int score{};
-  int x{}, y{};
-  int orientation{};
 
   inline static constexpr const auto& MOVE_Q =
       TankConstants::Move::Q;

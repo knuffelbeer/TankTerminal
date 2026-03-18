@@ -1,12 +1,11 @@
 #pragma once
+#include "../../position.h"
 
 class Game;
-class Element {
+class Element : public Position {
 public:
   int t{};
   bool active = true;
-  int x;
-  int y;
   int vx{};
   int vy{};
   bool is_hit = false;
@@ -24,8 +23,8 @@ public:
   Element &operator=(Element &&) noexcept = default;
 
 protected:
-  Element(int x, int y);
-  Element(int x, int y, int vx, int vy);
+  Element(int x, int y, int type_name);
+  Element(int x, int y, int type_name, int vx, int vy);
 
   void declare_winner(Game *game);
   static void step(Game *game, int &x, int &y, int &vx, int &vy);

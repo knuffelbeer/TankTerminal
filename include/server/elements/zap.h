@@ -1,5 +1,4 @@
 #pragma once
-
 #include "element.h"
 #include <ncurses.h>
 
@@ -31,8 +30,8 @@ public:
 
 class ZapAimPixel : public Element {
 public:
+  ZapAimPixel(int x, int y);
   constexpr static int range = 20;
-  ZapAimPixel(int x, int y) : Element(x, y) {};
   void hit(Game *game) override;
   void draw(Game *game) override;
   void move(Game *game) override;

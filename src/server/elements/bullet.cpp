@@ -1,12 +1,11 @@
-#include "../../include/elements/bullet.h"
-#include "../../include/game.h"
-#include <iostream>
+#include "../../../include/server/elements/bullet.h"
+#include "../../../include/server/game.h"
 #include <ncurses.h>
 #include <utility>
 
 std::array<int, 2> Bullet::counter{};
 Bullet::Bullet(int x, int y, int vx, int vy, int player)
-    : Element(x, y, vx, vy), prev_loc({x, y}), player(player) {
+    : Element(x, y, BULLET_TYPE, vx, vy), prev_loc({x, y}), player(player) {
   personal_counter = &counter[player];
   (*personal_counter)++;
 }

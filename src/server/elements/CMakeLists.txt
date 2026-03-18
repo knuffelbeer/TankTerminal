@@ -1,4 +1,4 @@
-target_sources(TankTerminal PRIVATE
+target_sources(server PRIVATE
 element.cpp
 bullet.cpp
 zap.cpp
