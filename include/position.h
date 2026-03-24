@@ -12,8 +12,9 @@ enum {
   ZAP_SPRITE_TYPE,
 };
 
-
 #pragma pack(push, 1)
+
+// All members must be uint32_t for safe and easy sending!
 struct Position {
   uint32_t x;
   uint32_t y;

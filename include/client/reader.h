@@ -1,15 +1,9 @@
+#pragma once
 
-/*
-** client.c -- a stream socket client demo
-*/
-
-#include "../../include/position.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <errno.h>
-#include <iostream>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -19,7 +13,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #include <arpa/inet.h>
 #include <cassert>
 #include <vector>

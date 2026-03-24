@@ -1,5 +1,6 @@
 #include "../../../include/server/elements/zap.h"
 #include "../../../include/server/game.h"
+#include "../../../include/renderer.h"
 #include <cstdint>
 
 ZapAimPixel::ZapAimPixel(uint32_t x, uint32_t y) : Element(x, y, ZAP_AIM_PIXEL_TYPE) {};

@@ -1,7 +1,7 @@
 #include "../../include/client/reader.h"
+#include "../../include/position.h"
 #include <cassert>
 #include <cstddef>
-#include <cstdio>
 #include <cstring>
 #include <netdb.h>
 #include <netinet/in.h>

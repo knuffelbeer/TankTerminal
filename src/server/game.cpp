@@ -6,6 +6,7 @@
 #include "../../include/server/elements/zap.h"
 #include "../../include/server/wall.h"
 #include <cassert>
+#include <concepts>
 #include <ncurses.h>
 #include <variant>
 #include <vector>
@@ -131,6 +132,7 @@ void Game::loop() {
       server.iteration(wall_buffer.data, wall_buffer.get_num_bytes());
       walls_drawn = true;
     }
+
     for (Wall w : walls) {
       w.draw(my_win);
     }
@@ -138,8 +140,6 @@ void Game::loop() {
       current_player = p;
       tanks[p].update(this, ch, run);
     }
-    update_bullets();
-
     if (ch == 'x') {
       ManageGame_run = false;
       break;
@@ -151,8 +151,12 @@ void Game::loop() {
       std::visit(
           [&size_msg](const auto &obj) {
             Position pos_temp = obj;
-            if (obj.active) {
+            if constexpr (std::same_as<decltype(obj), ZapAimPixel>) {
               size_msg += (int)sizeof(Position);
+            } else {
+              if (obj.active) {
+                size_msg += (int)sizeof(Position);
+              }
             }
           },
           el);
@@ -165,8 +169,12 @@ void Game::loop() {
       std::visit(
           [&buf, &i, &size_msg](const auto &obj) {
             Position pos_temp = obj;
-            if (obj.active) {
+            if constexpr (std::same_as<decltype(obj), ZapAimPixel>) {
               buf.add(pos_temp);
+            } else {
+              if (obj.active) {
+                buf.add(pos_temp);
+              }
             }
           },
           el);
@@ -175,6 +183,7 @@ void Game::loop() {
       printf("message size is corrupt! size_msg: %i, get_num_bytes(): %i",
              size_msg, buf.get_num_bytes());
     }
+    update_bullets();
     server.iteration(buf.data, buf.get_num_bytes());
     wrefresh(my_win);
     usleep(DELTA_MS);

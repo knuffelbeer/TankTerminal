@@ -1,7 +1,7 @@
 #include "../../include/client/game.h"
+#include "../../include/renderer.h"
 #include "../../include/tank_constants.h"
 #include <array>
-#include <ncurses.h>
 
 Game::Game(int width, int height) : Window(width, height) {}
 
@@ -30,8 +30,29 @@ void Game::remove(const Position &el) { mvwaddch(my_win, el.y, el.x, ' '); }
 void Game::draw(const Position &el) {
   switch (el.type_idx) {
   case BULLET_TYPE:
+    wattron(my_win, COLOR_PAIR(WHITE_BLACK));
     mvwaddch(my_win, el.y, el.x, ACS_BLOCK);
+    wattroff(my_win, COLOR_PAIR(WHITE_BLACK));
     break;
+  case MINE_SPRITE_TYPE:
+    mvwaddch(my_win, el.y, el.x, '=');
+  case MINE_TYPE:
+    mvwaddch(my_win, el.y, el.x, '+');
+  case ZAP_SPRITE_TYPE:
+    mvwaddch(my_win, el.y, el.x, '+');
+    break;
+  case ZAP_AIM_PIXEL_TYPE:
+    wattron(my_win, COLOR_PAIR(YELLOW_BLACK));
+    mvwaddch(my_win, el.y, el.x, '.');
+    wattroff(my_win, COLOR_PAIR(YELLOW_BLACK));
+    break;
+  case ZAP_PIXEL_TYPE:
+    wattron(my_win, COLOR_PAIR(GREEN_BLACK));
+    mvwaddch(my_win, el.y, el.x, '.');
+    wattroff(my_win, COLOR_PAIR(GREEN_BLACK));
+    break;
+  default:
+    wprintw(my_win, "type: %i not found!", el.type_idx);
   }
 }
 
