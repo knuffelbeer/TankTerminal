@@ -1,10 +1,12 @@
+#include "../../include/client/game.h"
 #include "../../include/client/reader.h"
-#include "../../include/server/wall.h"
+#include "../../include/position.h"
+#include <_stdio.h>
+#include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <errno.h>
-#include <iostream>
+#include <ncurses.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -31,6 +33,26 @@ void *get_in_addr(struct sockaddr *sa) {
 }
 
 int main(int argc, char *argv[]) {
+  initscr();
+  raw();
+  noecho();
+  curs_set(0);
+  keypad(stdscr, TRUE);
+  start_color();
+  init_pair(BLACK_BLACK, COLOR_BLACK, COLOR_BLACK);
+  init_pair(BLACK_RED, COLOR_BLACK, COLOR_RED);
+  init_pair(BLACK_BLUE, COLOR_BLACK, COLOR_BLUE);
+  init_pair(GREEN_BLACK, COLOR_GREEN, COLOR_BLACK);
+  init_pair(GREEN_YELLOW, COLOR_GREEN, COLOR_YELLOW);
+  init_pair(RED_BLACK, COLOR_RED, COLOR_BLACK);
+  init_pair(BLUE_BLACK, COLOR_BLUE, COLOR_BLACK);
+  init_pair(YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(BLACK_WHITE, COLOR_BLACK, COLOR_WHITE);
+  init_pair(WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
+  init_pair(WHITE_WHITE, COLOR_WHITE, COLOR_WHITE);
+  init_color(8, 255, 99, 0);
+  init_pair(BLACK_ORANGE, COLOR_BLACK, 8);
+  auto game = Game(40, 30);
   int sockfd;
   struct addrinfo hints, *servinfo, *p;
   int rv;
@@ -59,7 +81,6 @@ int main(int argc, char *argv[]) {
 
     inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s,
               sizeof s);
-    printf("client: attempting connection to %s\n", s);
 
     if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
       perror("client: connect");
@@ -77,63 +98,63 @@ int main(int argc, char *argv[]) {
 
   inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s,
             sizeof s);
-  printf("client: connected to %s\n", s);
   freeaddrinfo(servinfo); // all done with this structure
-
   int start = 0;
   auto num_tank_bytes = sizeof(TankLayout) * 2;
   auto num_message_bytes = sizeof(Message);
   auto reader = Reader();
+  std::vector<Position> positions;
+  std::array<TankLayout, 2> tanks;
+  std::vector<WallLayout> WallLayouts;
   while (1) {
     start = reader.make_buf(start, sockfd);
-    printf("start: %i\n", start);
-    std::cout << "reader_length" << reader.length << '\n';
-    std::cout << "message_type" << reader.message_type << '\n';
     switch (reader.message_type) {
-
     case 0: {
+      assert((reader.length - num_tank_bytes - num_message_bytes) %
+                     sizeof(Position) ==
+                 0 &&
+             "not an interger number of positions\n");
 
-      std::array<TankLayout, 2> tanks = reader.read<TankLayout, 2>();
-      if ((reader.length - num_tank_bytes - num_message_bytes) %
-              sizeof(Position) !=
-          0) {
-        printf("not an interger number of positions\n");
+      for (const auto &el : positions) {
+        game.remove(el);
+      }
+      for (const auto &tank : tanks) {
+        game.remove(tank);
       }
 
-      std::vector<Position> positions = reader.read<Position>(
+      tanks = reader.read<TankLayout, 2>();
+      positions = reader.read<Position>(
           (reader.length - num_tank_bytes - num_message_bytes) /
           sizeof(Position));
-      for (const auto &t : tanks) {
-        std::cout << "tank: x: " << t.x << " y: " << t.y << '\n';
+      for (auto &el : positions) {
+        game.draw(el);
       }
-
-      for (const auto &e : positions)
-        std::cout << "x: " << e.x << " y: " << e.y << "type" << e.type_idx
-                  << '\n';
+      game.draw(tanks);
       break;
     }
     case 1: {
-      if ((reader.length - num_message_bytes) % sizeof(Wall) != 0) {
-        printf("not integer number of walls!");
-      }
-      std::vector<Wall> walls =
-          reader.read<Wall>((reader.length - num_message_bytes) / sizeof(Wall));
-      for (const auto &w : walls) {
-
-        std::cout << "wall dir: " << (char)w.direction << ' ' << w.loc << ' ' << w.start << ' '
-                  << w.stop << '\n';
+      assert((reader.length - num_message_bytes) % sizeof(WallLayout) == 0 &&
+             "not integer number of walls!");
+      for (const auto &wall : WallLayouts) {
+        game.remove(wall);
       }
 
+      WallLayouts = reader.read<WallLayout>(
+          (reader.length - num_message_bytes) / sizeof(WallLayout));
+      for (const auto &w : WallLayouts) {
+        game.draw(w);
+      }
       break;
     }
     default: {
       printf("message not valid! message: %i %i", reader.length,
              reader.message_type);
+      throw;
     }
     }
     reader.swap_buffer();
+    wrefresh(game.my_win);
   }
-
   close(sockfd);
 
   return 0;

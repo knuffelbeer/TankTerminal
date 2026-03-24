@@ -1,8 +1,9 @@
-#include "../../include/server/window.h"
+#include "../include/window.h"
 
 Window::Window(int width, int height, int startx, int starty)
     : width(width), height(height), startx(startx), starty(starty) {
   my_win = create_newwin();
+  refresh();
 }
 
 Window::Window(int width, int height) : width(width), height(height) {

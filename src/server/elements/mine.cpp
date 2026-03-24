@@ -1,6 +1,6 @@
 #include "../../../include/server/elements/mine.h"
 #include "../../../include/server/game.h"
-#include "../../../include/server/renderer.h"
+#include "../../../include/renderer.h"
 
 Mine::Mine(int x, int y) : Element(x, y, MINE_TYPE) {}
 MineSprite::MineSprite(int x, int y) : Element(x, y, MINE_SPRITE_TYPE) {}

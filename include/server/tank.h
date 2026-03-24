@@ -1,7 +1,7 @@
 #pragma once
 #include "elements/element.h"
-#include "renderer.h"
-#include "tank_constants.h"
+#include "../renderer.h"
+#include "../tank_constants.h"
 #include "wall.h"
 #include <functional>
 

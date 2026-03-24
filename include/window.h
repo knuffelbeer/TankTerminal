@@ -16,7 +16,6 @@ public:
   Window(int width, int height, int startx, int starty);
   void add_border();
   void refresh();
-
   void display_text(const char *text, int x, int y);
   void clear();
   void color_on(int num_pair);

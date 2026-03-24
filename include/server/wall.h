@@ -1,10 +1,7 @@
 #pragma once
-#include "renderer.h"
+#include "../renderer.h"
+#include "../position.h"
 
-struct Wall {
-  int direction;
-  int loc;
-  int start;
-  int stop;
+struct Wall : public WallLayout {
   void draw(WINDOW *my_win);
 };

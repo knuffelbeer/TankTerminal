@@ -30,6 +30,12 @@ struct Message {
   int type;
 };
 
+struct WallLayout {
+  int direction;
+  int loc;
+  int start;
+  int stop;
+};
 #pragma pack(pop)
 #define ELEMENT_TYPES                                                          \
   Bullet, Rocket, RocketSprite, ZapPixel, ZapAimPixel, ZapSprite, MineSprite,  \

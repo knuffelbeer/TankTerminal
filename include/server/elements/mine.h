@@ -8,8 +8,9 @@ class MineSprite : public Element {
 public:
   int amt_spawned{};
   MineSprite(int x, int y);
-  void draw(Game *game) override;
-  void hit(Game *game) override;
+  void draw(Game *game);
+  void hit(Game *game) ;
+	void move(Game *game){}
 };
 
 class Mine : public Element {
@@ -17,6 +18,7 @@ class Mine : public Element {
 
 public:
 	Mine(int x, int y);
-  void draw(Game *game) override;
-  void hit(Game *game) override;
+  void draw(Game *game) ;
+  void hit(Game *game) ;
+	void move(Game *game){}
 };

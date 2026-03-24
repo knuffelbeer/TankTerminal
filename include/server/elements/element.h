@@ -10,9 +10,6 @@ public:
   int vy{};
   bool is_hit = false;
   constexpr static int t_max = 30;
-  virtual void move(Game *game) {}
-  virtual void draw(Game *game) {}
-  virtual void hit(Game *game) {}
   virtual void cleanup(Game *game);
   virtual ~Element() = default;
 

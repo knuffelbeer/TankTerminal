@@ -1,9 +1,7 @@
-
 #include <array>
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
-#include <tuple>
 #include <vector>
 
 class Reader {

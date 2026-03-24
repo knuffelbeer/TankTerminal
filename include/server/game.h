@@ -5,7 +5,7 @@
 #include "server.h"
 #include "elements/zap.h"
 #include "tank.h"
-#include "window.h"
+#include "../window.h"
 #include <unistd.h>
 #include <utility>
 #include <variant>
