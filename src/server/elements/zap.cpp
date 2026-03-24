@@ -1,11 +1,12 @@
 #include "../../../include/server/elements/zap.h"
 #include "../../../include/server/game.h"
+#include <cstdint>
 
-ZapAimPixel::ZapAimPixel(int x, int y) : Element(x, y, ZAP_AIM_PIXEL_TYPE) {};
-ZapSprite::ZapSprite(int x, int y) : Element(x, y, ZAP_SPRITE_TYPE) {}
+ZapAimPixel::ZapAimPixel(uint32_t x, uint32_t y) : Element(x, y, ZAP_AIM_PIXEL_TYPE) {};
+ZapSprite::ZapSprite(uint32_t x, uint32_t y) : Element(x, y, ZAP_SPRITE_TYPE) {}
 
 template <typename T>
-void ZapSprite::custom_shot(Game *game, int x, int y, int vx, int vy) {
+void ZapSprite::custom_shot(Game *game, uint32_t x, uint32_t y, int vx, int vy) {
   for (int i = 0; i < T::range; i++) {
     step(game, x, y, vx, vy);
     for (auto &t : game->tanks) {
@@ -54,7 +55,7 @@ void ZapPixel::draw(Game *game) {
   wattroff(game->my_win, COLOR_PAIR(GREEN_BLACK));
 }
 
-ZapPixel::ZapPixel(int x, int y) : Element(x, y, ZAP_PIXEL_TYPE) {}
+ZapPixel::ZapPixel(uint32_t x, uint32_t y) : Element(x, y, ZAP_PIXEL_TYPE) {}
 
 void ZapPixel::move(Game *game) {
   t++;

@@ -6,6 +6,7 @@
 #include "elements/zap.h"
 #include "tank.h"
 #include "../window.h"
+#include <cstdint>
 #include <unistd.h>
 #include <utility>
 #include <variant>
@@ -20,9 +21,9 @@ class Game : public Window {
 
 public:
   std::vector<std::array<int, 2>> tank_positions;
-  int border_height = 10;
-  int level_width;
-  int level_height;
+  uint32_t border_height = 10;
+  uint32_t level_width;
+  uint32_t level_height;
   bool run = true;
   static constexpr int DELTA_MS = 100000;
   int current_player = 0;

@@ -1,8 +1,10 @@
 #include "../../../include/server/elements/element.h"
 #include "../../../include/server/game.h"
+#include <cstdint>
 
-Element::Element(int x, int y, int type_name) : Position{x, y, type_name} {}
-Element::Element(int x, int y, int type_name, int vx, int vy)
+Element::Element(uint32_t x, uint32_t y, uint32_t type_name)
+    : Position{x, y, type_name} {}
+Element::Element(uint32_t x, uint32_t y, uint32_t type_name, int vx, int vy)
     : Position{x, y, type_name}, vx(vx), vy(vy) {}
 
 void Element::declare_winner(Game *game) {
@@ -25,7 +27,7 @@ void Element::cleanup(Game *game) {
   wattroff(game->my_win, BLACK_BLACK);
 }
 
-void Element::step(Game *game, int &x, int &y, int &vx, int &vy) {
+void Element::step(Game *game, uint32_t &x, uint32_t &y, int &vx, int &vy) {
   bool flipped_x{}, flipped_y{};
   for (auto w : game->walls) {
     if (w.direction == 'H') {

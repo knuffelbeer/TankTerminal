@@ -20,9 +20,9 @@ public:
   Element &operator=(Element &&) noexcept = default;
 
 protected:
-  Element(int x, int y, int type_name);
-  Element(int x, int y, int type_name, int vx, int vy);
+  Element(uint32_t x, uint32_t y, uint32_t type_name);
+  Element(uint32_t x, uint32_t y, uint32_t type_name, int vx, int vy);
 
   void declare_winner(Game *game);
-  static void step(Game *game, int &x, int &y, int &vx, int &vy);
+  static void step(Game *game, uint32_t &x, uint32_t &y, int &vx, int &vy);
 };

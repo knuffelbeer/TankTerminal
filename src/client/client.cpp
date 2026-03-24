@@ -105,45 +105,40 @@ int main(int argc, char *argv[]) {
   auto reader = Reader();
   std::vector<Position> positions;
   std::array<TankLayout, 2> tanks;
-  std::vector<WallLayout> WallLayouts;
+  std::vector<WallLayout> walls;
   while (1) {
     start = reader.make_buf(start, sockfd);
     switch (reader.message_type) {
     case 0: {
+
       assert((reader.length - num_tank_bytes - num_message_bytes) %
                      sizeof(Position) ==
                  0 &&
              "not an interger number of positions\n");
 
-      for (const auto &el : positions) {
-        game.remove(el);
-      }
-      for (const auto &tank : tanks) {
-        game.remove(tank);
-      }
+      game.remove(positions);
+      game.remove(tanks);
 
       tanks = reader.read<TankLayout, 2>();
-      positions = reader.read<Position>(
+      auto num_positions =
           (reader.length - num_tank_bytes - num_message_bytes) /
-          sizeof(Position));
-      for (auto &el : positions) {
-        game.draw(el);
-      }
+          sizeof(Position);
+      positions = reader.read<Position>(num_positions);
+
+      game.draw(positions);
       game.draw(tanks);
       break;
     }
     case 1: {
       assert((reader.length - num_message_bytes) % sizeof(WallLayout) == 0 &&
              "not integer number of walls!");
-      for (const auto &wall : WallLayouts) {
-        game.remove(wall);
-      }
 
-      WallLayouts = reader.read<WallLayout>(
-          (reader.length - num_message_bytes) / sizeof(WallLayout));
-      for (const auto &w : WallLayouts) {
-        game.draw(w);
-      }
+      game.remove(walls);
+
+      auto num_walls = (reader.length - num_message_bytes) / sizeof(WallLayout);
+      walls = reader.read<WallLayout>(num_walls);
+
+      game.draw(walls);
       break;
     }
     default: {

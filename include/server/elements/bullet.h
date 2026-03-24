@@ -8,7 +8,7 @@ class Bullet : public Element {
 public:
   int player;
   static std::array<int, 2> counter;
-  Bullet(int x, int y, int vx, int vy, int current_player);
+  Bullet(uint32_t x, uint32_t y, int vx, int vy, int current_player);
   void move(Game *game);
   void draw(Game *game);
   void hit(Game *game);
@@ -21,5 +21,5 @@ public:
   Bullet &operator=(Bullet &&other) noexcept;
 
 private:
-  std::array<int, 2> prev_loc;
+  std::array<uint32_t, 2> prev_loc;
 };

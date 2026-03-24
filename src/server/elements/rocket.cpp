@@ -3,7 +3,7 @@
 #include "../../../include/server/tank.h"
 #include <ncurses.h>
 
-Rocket::Rocket(int x, int y, int vx, int vy, int player)
+Rocket::Rocket(uint32_t x, uint32_t y, int vx, int vy, int player)
     : Element(x, y, ROCKET_TYPE,vx, vy), player(player) {}
 void Rocket::adjust_dir(Game *game, Tank &tank, int ch) {
   if (ch == tank.left) {
@@ -48,7 +48,7 @@ void Rocket::draw(Game *game) {
   }
 }
 
-RocketSprite::RocketSprite(int x, int y) : Element(x, y,ROCKET_SPRITE_TYPE) {}
+RocketSprite::RocketSprite(uint32_t x, uint32_t y) : Element(x, y,ROCKET_SPRITE_TYPE) {}
 void RocketSprite::hit(Game *game) {
   active = false;
 

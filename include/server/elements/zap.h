@@ -6,7 +6,7 @@ class Game;
 
 class ZapSprite : public Element {
   template <typename T>
-  static void custom_shot(Game *game, int x, int y, int vx, int vy);
+  static void custom_shot(Game *game, uint32_t x, uint32_t y, int vx, int vy);
 
 public:
   void move(Game *game);
@@ -14,7 +14,7 @@ public:
   void hit(Game *game);
   void cleanup(Game *game) override;
   bool fire = false;
-  ZapSprite(int x, int y);
+  ZapSprite(uint32_t x, uint32_t y);
 };
 
 class ZapPixel : public Element {
@@ -22,7 +22,7 @@ class ZapPixel : public Element {
 public:
   constexpr static int t_max = 5;
   constexpr static int range = 40;
-  ZapPixel(int x, int y);
+  ZapPixel(uint32_t x, uint32_t y);
   void move(Game *game);
   void draw(Game *game);
   void hit(Game *game);
@@ -30,7 +30,7 @@ public:
 
 class ZapAimPixel : public Element {
 public:
-  ZapAimPixel(int x, int y);
+  ZapAimPixel(uint32_t x, uint32_t y);
   constexpr static int range = 20;
   void hit(Game *game);
   void draw(Game *game);

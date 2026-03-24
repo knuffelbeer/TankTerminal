@@ -3,6 +3,7 @@
 #include "../renderer.h"
 #include "../tank_constants.h"
 #include "wall.h"
+#include <cstdint>
 #include <functional>
 
 class Game;
@@ -36,9 +37,9 @@ public:
 
   char fire_element = 'B';
   Tank(WINDOW *my_win, int left, int right, int up, int down, int shoot,
-       int color_pair);
-  Tank(WINDOW *my_win, int x, int y, int image, int left, int right, int up,
-       int down, int shoot, int color_pair);
+       uint32_t color_pair);
+  Tank(WINDOW *my_win, uint32_t x, uint32_t y, uint32_t image, int left, int right, int up,
+       int down, int shoot, uint32_t color_pair);
   void update(Game *game, int ch, bool &run);
   bool check_and_process_hit(Game *game);
   bool is_hit(int other_x, int other_y);

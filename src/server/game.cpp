@@ -5,6 +5,7 @@
 #include "../../include/server/elements/rocket.h"
 #include "../../include/server/elements/zap.h"
 #include "../../include/server/wall.h"
+#include <cassert>
 #include <ncurses.h>
 #include <variant>
 #include <vector>
@@ -35,6 +36,7 @@ void Game::reset() {
 }
 
 void Game::build() {
+  assert(height > border_height && "height must be bigger then border_height");
   level_height = height - border_height;
   level_width = width;
   tanks = {Tank(my_win, 10, 10, TankConstants::Direction::HORIZONTAL_LEFT, 'd',
@@ -119,8 +121,9 @@ void Game::loop() {
     }
     ch = getch();
     if (!walls_drawn) {
-      auto wall_buffer = Buffer<500>();
-      int size_msg = (int)sizeof(Message) + (int)sizeof(Wall) * walls.size();
+      auto wall_buffer = Buffer();
+      uint32_t size_msg =
+          (int)sizeof(Message) + (int)sizeof(Wall) * walls.size();
       wall_buffer.add(Message{size_msg, 1});
       for (Wall w : walls) {
         wall_buffer.add(w);
@@ -141,8 +144,8 @@ void Game::loop() {
       ManageGame_run = false;
       break;
     }
-    auto buf = Buffer<500>();
-    int size_msg = (int)sizeof(Message) + 2 * (int)sizeof(TankLayout);
+    auto buf = Buffer();
+    uint32_t size_msg = (int)sizeof(Message) + 2 * (int)sizeof(TankLayout);
 
     for (const auto &el : elements) {
       std::visit(

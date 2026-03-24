@@ -4,7 +4,7 @@
 #include <utility>
 
 std::array<int, 2> Bullet::counter{};
-Bullet::Bullet(int x, int y, int vx, int vy, int player)
+Bullet::Bullet(uint32_t x, uint32_t y, int vx, int vy, int player)
     : Element(x, y, BULLET_TYPE, vx, vy), prev_loc({x, y}), player(player) {
   personal_counter = &counter[player];
   (*personal_counter)++;
