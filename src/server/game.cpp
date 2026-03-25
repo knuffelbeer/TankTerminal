@@ -1,5 +1,5 @@
 #include "../../include/server/game.h"
-#include "../../include/server/buffer.h"
+#include "../../include/buffer.h"
 #include "../../include/server/elements/bullet.h"
 #include "../../include/server/elements/mine.h"
 #include "../../include/server/elements/rocket.h"
@@ -120,7 +120,7 @@ void Game::loop() {
       server.listen_for_connections();
       continue;
     }
-    ch = getch();
+    // ch = getch();
     if (!walls_drawn) {
       auto wall_buffer = Buffer();
       uint32_t size_msg =
@@ -129,7 +129,7 @@ void Game::loop() {
       for (Wall w : walls) {
         wall_buffer.add(w);
       }
-      server.iteration(wall_buffer.data, wall_buffer.get_num_bytes());
+      server.iteration(wall_buffer.data, wall_buffer.get_num_bytes(), ch);
       walls_drawn = true;
     }
 
@@ -184,7 +184,7 @@ void Game::loop() {
              size_msg, buf.get_num_bytes());
     }
     update_bullets();
-    server.iteration(buf.data, buf.get_num_bytes());
+    server.iteration(buf.data, buf.get_num_bytes(), ch);
     wrefresh(my_win);
     usleep(DELTA_MS);
   }

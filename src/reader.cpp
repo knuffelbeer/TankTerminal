@@ -1,5 +1,5 @@
-#include "../../include/client/reader.h"
-#include "../../include/position.h"
+#include "../include/reader.h"
+#include "../include/position.h"
 #include <cassert>
 #include <cstddef>
 #include <cstring>

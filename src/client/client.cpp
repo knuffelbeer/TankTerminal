@@ -1,9 +1,11 @@
 #include "../../include/client/game.h"
-#include "../../include/client/reader.h"
+#include "../../include/reader.h"
 #include "../../include/position.h"
+#include "../../include/buffer.h"
 #include <_stdio.h>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <ncurses.h>
@@ -106,7 +108,19 @@ int main(int argc, char *argv[]) {
   std::vector<Position> positions;
   std::array<TankLayout, 2> tanks;
   std::vector<WallLayout> walls;
+  nodelay(stdscr, TRUE);
   while (1) {
+    int ch = getch();
+
+    if (ch > 0) {
+      auto buffer = Buffer();
+      auto size_m = 2 * sizeof(uint32_t) + sizeof(Message);
+      auto m = Message{static_cast<uint32_t>(size_m), 3};
+      buffer.add(m);
+      buffer.add((uint32_t)ch);
+      buffer.add((uint32_t)0);
+      send(sockfd, &buffer.data, size_m, 0);
+    }
     start = reader.make_buf(start, sockfd);
     switch (reader.message_type) {
     case 0: {

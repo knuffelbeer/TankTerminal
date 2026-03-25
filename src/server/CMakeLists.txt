@@ -3,5 +3,6 @@ target_sources(server PRIVATE
 	tank.cpp
 	game.cpp
 	managegame.cpp
+	server.cpp
 )
 add_subdirectory(elements)
