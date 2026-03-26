@@ -2,6 +2,7 @@
 #include "../../include/renderer.h"
 #include "../../include/tank_constants.h"
 #include <array>
+#include <ncurses.h>
 
 Game::Game() : Window(0, 0) {}
 Game::Game(int width, int height) : Window(width, height) {}

@@ -19,7 +19,7 @@ class Game : public Window {
   std::mutex mtx;
   void update_bullets();
   void draw_bullets();
-  bool &ManageGame_run;
+  bool ManageGame_run = true;
   std::queue<uint32_t> input;
   void iteration(Server *server);
 
@@ -34,8 +34,8 @@ public:
   std::vector<Wall> walls;
   std::vector<Tank> tanks;
   std::vector<std::variant<ELEMENT_TYPES>> elements;
-  Game(bool &ManageGame_run, int width, int height, int startx, int starty);
-  Game(bool &ManageGamerun, int width, int height);
+  Game(int width, int height);
+	~Game();
   void make_level(int num_level);
   void spawn_bullet(int x, int y, int vx, int vy);
 

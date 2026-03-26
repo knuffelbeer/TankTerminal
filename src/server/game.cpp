@@ -14,14 +14,27 @@
 #include <variant>
 #include <vector>
 
-Game::Game(bool &ManageGame_run, int width, int height, int startx, int starty)
-    : Window(width, height, startx, starty), ManageGame_run(ManageGame_run) {
+Game::Game(int width, int height) : Window(width, height) {
   elements.reserve(100);
-  build();
-}
-
-Game::Game(bool &ManageGame_run, int width, int height)
-    : Window(width, height), ManageGame_run(ManageGame_run) {
+  initscr();
+  raw();
+  noecho();
+  curs_set(0);
+  keypad(stdscr, TRUE);
+  start_color();
+  init_pair(BLACK_BLACK, COLOR_BLACK, COLOR_BLACK);
+  init_pair(BLACK_RED, COLOR_BLACK, COLOR_RED);
+  init_pair(BLACK_BLUE, COLOR_BLACK, COLOR_BLUE);
+  init_pair(GREEN_BLACK, COLOR_GREEN, COLOR_BLACK);
+  init_pair(GREEN_YELLOW, COLOR_GREEN, COLOR_YELLOW);
+  init_pair(RED_BLACK, COLOR_RED, COLOR_BLACK);
+  init_pair(BLUE_BLACK, COLOR_BLUE, COLOR_BLACK);
+  init_pair(YELLOW_BLACK, COLOR_YELLOW, COLOR_BLACK);
+  init_pair(BLACK_WHITE, COLOR_BLACK, COLOR_WHITE);
+  init_pair(WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
+  init_pair(WHITE_WHITE, COLOR_WHITE, COLOR_WHITE);
+  init_color(8, 255, 99, 0);
+  init_pair(BLACK_ORANGE, COLOR_BLACK, 8);
   build();
 }
 
@@ -171,6 +184,7 @@ void Game::iteration(Server *server) {
       ManageGame_run = false;
       break;
     }
+
     auto buf = Buffer();
     uint32_t size_msg = (int)sizeof(Message) + 2 * (int)sizeof(TankLayout);
 
@@ -234,3 +248,4 @@ void Game::iteration(Server *server) {
     usleep(DELTA_MS);
   }
 }
+Game::~Game() { endwin(); }

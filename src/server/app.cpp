@@ -1,7 +1,7 @@
-#include "../../include/server/managegame.h"
+#include "../../include/server/game.h"
 
 int main(int argc, char *argv[]) {
-  auto m = ManageGame();
-  m.run();
+  auto m = Game(40,30);
+  m.run_game();
   return 0;
 }
