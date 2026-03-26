@@ -1,5 +1,7 @@
 #pragma once
 
+#include <arpa/inet.h>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -13,8 +15,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <cassert>
 #include <vector>
 
 #define PORT "9034" // the port client will be connecting to
@@ -31,6 +31,13 @@ class Reader {
 public:
   int length;
   int message_type;
+
+  Reader& operator=(const Reader &other) {
+    buffer = (char *)&buffer_data;
+    overflow = (char *)&overflow_data;
+    return *this;
+  }
+
   Reader();
 
   template <typename T> T read_single() {

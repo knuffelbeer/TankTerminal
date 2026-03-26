@@ -4,9 +4,11 @@
 #include <cstdint>
 #include <cstdio>
 #include <fcntl.h>
+#include <mutex>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <queue>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,21 +26,30 @@ class Server {
   Reader reader = Reader();
   int start{};
   int fd_size = 3;
+  int fd_size_out = 2;
   int fd_count = 0;
   struct pollfd *pfds;
+  int fd_count_out = 0;
+  struct pollfd *pfds_out;
 
-  int get_listener_socket(void) ;
-  void add_to_pfds(int newfd) ;
-  void del_from_pfds(int i) ;
-  void handle_new_connection() ;
-  void check_new_connections(int *fd_count, struct pollfd **pfds) ;
+  int get_listener_socket(void);
+  void add_to_pfds(int newfd);
+  void del_from_pfds(int i);
+  void handle_new_connection();
+  void check_new_connections(int *fd_count, struct pollfd **pfds);
 
 public:
+  void send_data(char *vec, size_t n);
+  void recieve_input(std::queue<uint32_t> &input, std::mutex &mtx);
   bool connections_ready{};
-  Server() ;
-  void listen_for_connections() ;
-  void iteration(char *vec, size_t n, int &ch) ;
-  ~Server() ;
+  Server();
+  Server(Server &&) = default;
+  Server(const Server &) = delete;
+  Server &operator=(Server &&) = delete;
+  Server &operator=(const Server &) = delete;
+  ~Server();
+
+  void listen_for_connections();
 };
 
 inline const char *inet_ntop2(void *addr, char *buf, size_t size) {

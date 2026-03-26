@@ -11,7 +11,21 @@ class Game : public Window {
   void draw(const WallLayout &wall, int color);
 
 public:
+  Game();
   Game(int width, int height);
+  Game &operator=(const Game &other) = delete;
+  Game(const Game &) = delete; // copy constructor
+  Game(Game &&) = delete;      // move constructor
+  Game &operator=(Game &&other) noexcept {
+    width = other.width;
+    height = other.height;
+    startx = 0;
+    starty = 0;
+    my_win = create_newwin();
+    refresh();
+    return *this;
+  }; // move assignment
+
   void remove(const TankLayout &tank);
   void draw(const std::array<TankLayout, 2> &tank);
   void remove(const WallLayout &wall);

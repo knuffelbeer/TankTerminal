@@ -7,7 +7,10 @@
 #include "../../include/server/wall.h"
 #include <cassert>
 #include <concepts>
+#include <functional>
+#include <mutex>
 #include <ncurses.h>
+#include <thread>
 #include <variant>
 #include <vector>
 
@@ -112,25 +115,49 @@ void Game::spawn_bullet(int x, int y, int vx, int vy) {
   if (Bullet::counter[current_player] < 6)
     spawn<Bullet>(x, y, vx, vy, current_player);
 }
+void Game::send_data() {}
 
-void Game::loop() {
-  bool walls_drawn{};
-  while (run) {
-    if (!server.connections_ready) {
-      server.listen_for_connections();
-      continue;
+void Game::run_game() {
+  Server server;
+  while (!server.connections_ready) {
+    server.listen_for_connections();
+  }
+  std::thread t2(&Game::loop, this, &server);
+  std::thread t1(&Server::recieve_input, &server, std::ref(input),
+                 std::ref(mtx));
+  t1.join();
+  t2.join();
+}
+
+void Game::loop(Server *server) {
+  int l{};
+  while (ManageGame_run) {
+    clear();
+    l = (l + 1) % 3;
+    make_level(l);
+    for (int i = 0; i < tanks.size(); i++) {
+      wattron(my_win, COLOR_PAIR(tanks[i].color_pair));
+      mvwprintw(my_win, level_height + 3, i * 10, "score: %i", tanks[i].score);
+      wattroff(my_win, COLOR_PAIR(tanks[i].color_pair));
     }
-    // ch = getch();
-    if (!walls_drawn) {
-      auto wall_buffer = Buffer();
-      uint32_t size_msg =
-          (int)sizeof(Message) + (int)sizeof(Wall) * walls.size();
-      wall_buffer.add(Message{size_msg, 1});
-      for (Wall w : walls) {
-        wall_buffer.add(w);
+    iteration(server);
+    usleep(999999);
+    reset();
+  }
+}
+
+void Game::iteration(Server *server) {
+  bool walls_drawn{};
+  nodelay(stdscr, true);
+  while (run) {
+    {
+      std::lock_guard<std::mutex> guard(mtx);
+      if (!input.empty()) {
+        ch = input.front();
+        input.pop();
+      } else {
+        ch = 0;
       }
-      server.iteration(wall_buffer.data, wall_buffer.get_num_bytes(), ch);
-      walls_drawn = true;
     }
 
     for (Wall w : walls) {
@@ -147,12 +174,27 @@ void Game::loop() {
     auto buf = Buffer();
     uint32_t size_msg = (int)sizeof(Message) + 2 * (int)sizeof(TankLayout);
 
+    if (!walls_drawn) {
+      auto wall_buffer = Buffer();
+      uint32_t size_msg =
+          (int)sizeof(Message) + (int)sizeof(Wall) * walls.size();
+      wall_buffer.add(Message{size_msg, 1});
+      for (Wall w : walls) {
+        wall_buffer.add(w);
+      }
+      server->send_data(wall_buffer.data, wall_buffer.get_num_bytes());
+      walls_drawn = true;
+    }
+
     for (const auto &el : elements) {
       std::visit(
           [&size_msg](const auto &obj) {
             Position pos_temp = obj;
-            if constexpr (std::same_as<decltype(obj), ZapAimPixel>) {
-              size_msg += (int)sizeof(Position);
+            if constexpr (std::same_as<decltype(obj), const MineSprite &> ||
+                          std::same_as<decltype(obj), const Mine &>) {
+              if (obj.visible && obj.active) {
+                size_msg += (int)sizeof(Position);
+              }
             } else {
               if (obj.active) {
                 size_msg += (int)sizeof(Position);
@@ -169,8 +211,11 @@ void Game::loop() {
       std::visit(
           [&buf, &i, &size_msg](const auto &obj) {
             Position pos_temp = obj;
-            if constexpr (std::same_as<decltype(obj), ZapAimPixel>) {
-              buf.add(pos_temp);
+            if constexpr (std::same_as<decltype(obj), const MineSprite &> ||
+                          std::same_as<decltype(obj), const Mine &>) {
+              if (obj.visible && obj.active) {
+                buf.add(pos_temp);
+              }
             } else {
               if (obj.active) {
                 buf.add(pos_temp);
@@ -184,7 +229,7 @@ void Game::loop() {
              size_msg, buf.get_num_bytes());
     }
     update_bullets();
-    server.iteration(buf.data, buf.get_num_bytes(), ch);
+    server->send_data(buf.data, buf.get_num_bytes());
     wrefresh(my_win);
     usleep(DELTA_MS);
   }

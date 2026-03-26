@@ -5,9 +5,9 @@ class Window {
 protected:
   int startx, starty, width, height;
   int ch;
+  WINDOW *create_newwin();
 
 private:
-  WINDOW *create_newwin();
   void destroy_win(WINDOW *local_win);
 
 public:

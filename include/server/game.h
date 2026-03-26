@@ -1,12 +1,14 @@
 #pragma once
+#include "../window.h"
 #include "elements/bullet.h"
 #include "elements/mine.h"
 #include "elements/rocket.h"
-#include "server.h"
 #include "elements/zap.h"
+#include "server.h"
 #include "tank.h"
-#include "../window.h"
 #include <cstdint>
+#include <mutex>
+#include <queue>
 #include <unistd.h>
 #include <utility>
 #include <variant>
@@ -14,10 +16,12 @@
 
 class Game : public Window {
   void build();
+  std::mutex mtx;
   void update_bullets();
   void draw_bullets();
   bool &ManageGame_run;
-	Server server = Server();
+  std::queue<uint32_t> input;
+  void iteration(Server *server);
 
 public:
   std::vector<std::array<int, 2>> tank_positions;
@@ -42,5 +46,7 @@ public:
     return std::get<T>(elements.back());
   }
   void reset();
-  void loop();
+  void loop(Server *server);
+  void send_data();
+  void run_game();
 };

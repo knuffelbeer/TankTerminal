@@ -3,6 +3,7 @@
 #include "../../include/tank_constants.h"
 #include <array>
 
+Game::Game() : Window(0, 0) {}
 Game::Game(int width, int height) : Window(width, height) {}
 
 void Game::remove(const WallLayout &wall) {
@@ -35,11 +36,11 @@ void Game::draw(const Position &el) {
     wattroff(my_win, COLOR_PAIR(WHITE_BLACK));
     break;
   case MINE_SPRITE_TYPE:
-    mvwaddch(my_win, el.y, el.x, '=');
+    mvwaddch(my_win, el.y, el.x, 'M');
   case MINE_TYPE:
     mvwaddch(my_win, el.y, el.x, '+');
   case ZAP_SPRITE_TYPE:
-    mvwaddch(my_win, el.y, el.x, '+');
+    mvwaddch(my_win, el.y, el.x, 'Z');
     break;
   case ZAP_AIM_PIXEL_TYPE:
     wattron(my_win, COLOR_PAIR(YELLOW_BLACK));
@@ -51,6 +52,13 @@ void Game::draw(const Position &el) {
     mvwaddch(my_win, el.y, el.x, '.');
     wattroff(my_win, COLOR_PAIR(GREEN_BLACK));
     break;
+  case ROCKET_SPRITE_TYPE:
+    mvwaddch(my_win, el.y, el.x, 'R');
+    break;
+  case ROCKET_TYPE:
+    mvwaddch(my_win, el.y, el.x, '*');
+    break;
+
   default:
     wprintw(my_win, "type: %i not found!", el.type_idx);
   }

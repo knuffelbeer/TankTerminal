@@ -10,6 +10,7 @@ enum {
   ZAP_PIXEL_TYPE,
   ZAP_AIM_PIXEL_TYPE,
   ZAP_SPRITE_TYPE,
+	NUM_ELEMENT_TYPES
 };
 
 #pragma pack(push, 1)

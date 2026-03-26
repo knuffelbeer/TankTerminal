@@ -1,6 +1,6 @@
 #include "../../../include/server/elements/mine.h"
-#include "../../../include/server/game.h"
 #include "../../../include/renderer.h"
+#include "../../../include/server/game.h"
 
 Mine::Mine(int x, int y) : Element(x, y, MINE_TYPE) {}
 MineSprite::MineSprite(int x, int y) : Element(x, y, MINE_SPRITE_TYPE) {}
@@ -15,8 +15,10 @@ void Mine::draw(Game *game) {
     t++;
     mvwaddch(game->my_win, y, x, '=');
   }
-  if (t == 5)
+  if (t == 5) {
+    visible = false;
     mvwaddch(game->my_win, y, x, ' ');
+  }
 }
 
 void MineSprite::hit(Game *game) {

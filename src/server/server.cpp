@@ -1,4 +1,9 @@
 #include "../../include/server/server.h"
+#include <chrono>
+#include <cstdint>
+#include <mutex>
+#include <queue>
+#include <thread>
 
 int Server::get_listener_socket(void) {
   int listener; // Listening socket descriptor
@@ -64,6 +69,11 @@ void Server::add_to_pfds(int newfd) {
   (pfds)[fd_count].revents = 0;
   (fd_count)++;
 
+  (pfds_out)[fd_count_out].fd = newfd;
+  (pfds_out)[fd_count_out].events = POLLOUT; // Check_ready-to-write
+  (pfds_out)[fd_count_out].revents = 0;
+  (fd_count_out)++;
+
   if (fd_count == fd_size) {
     printf("max_number of connections");
     for (int i = 0; i < fd_size; i++) {
@@ -110,6 +120,7 @@ void Server::check_new_connections(int *fd_count, struct pollfd **pfds) {
 
 Server::Server() {
   pfds = static_cast<pollfd *>(malloc(sizeof *pfds * fd_size));
+  pfds_out = static_cast<pollfd *>(malloc(sizeof *pfds_out * fd_size_out));
   // Set up and get a listening socket
   listener = get_listener_socket();
   // fcntl(listener, F_SETFL, O_NONBLOCK);
@@ -145,40 +156,56 @@ void Server::listen_for_connections() {
   return;
 }
 
-void Server::iteration(char *vec, size_t n, int &ch) {
-
-  if (!connections_ready) {
-
-    printf("connections not ready!");
-    throw;
-  }
-  int poll_count = poll(pfds, fd_count, 0);
-
-  for (int j = 1; j < fd_size; j++) {
-    char buf[10];
-    if (pfds[j].revents & POLLHUP || pfds[j].revents & POLLNVAL ||
-        pfds[j].revents & POLLERR)
+void Server::send_data(char *vec, size_t n) {
+  int poll_count_out = poll(pfds_out, fd_count_out, 0);
+  for (int j = 0; j < fd_size_out; j++) {
+    if (pfds_out[j].revents & POLLHUP || pfds_out[j].revents & POLLNVAL ||
+        pfds_out[j].revents & POLLERR)
       throw;
-    if (pfds[j].revents & (POLLIN)) {
-      reader.make_buf(start, pfds[j].fd);
-      ch = reader.read_single<uint32_t>();
-      int player = reader.read_single<uint32_t>();
-      reader.swap_buffer();
-      printf("ch: %c\n", ch);
-      printf("player: %i\n", player);
-      printf("chi: %i\n", ch);
-    } else {
-      ch = 0;
-    }
-    int total_bytes_sent{};
-    while (total_bytes_sent < n) {
-      int bytes_sent = send(pfds[j].fd, vec, n, 0);
-      if (bytes_sent < 0) {
-        printf("error while sending");
-        throw;
+    if (pfds_out[j].revents & POLLOUT) {
+      int total_bytes_sent{};
+      while (total_bytes_sent < n) {
+        int bytes_sent = send(pfds_out[j].fd, vec, n, 0);
+        if (bytes_sent < 0) {
+          printf("error while sending");
+          throw;
+        }
+        total_bytes_sent += bytes_sent;
       }
-      total_bytes_sent += bytes_sent;
     }
   }
 }
-Server::~Server() { free(pfds); }
+
+void Server::recieve_input(std::queue<uint32_t> &input, std::mutex &mtx) {
+  while (1) {
+    int poll_count = poll(pfds, fd_count, -1);
+    for (int j = 1; j < fd_size; j++) {
+      if (pfds[j].revents & POLLHUP || pfds[j].revents & POLLNVAL ||
+          pfds[j].revents & POLLERR)
+        throw;
+      if (pfds[j].revents & (POLLIN)) {
+        reader.make_buf(start, pfds[j].fd);
+        uint32_t ch = reader.read_single<uint32_t>();
+        if (ch > 0) {
+          {
+            std::lock_guard<std::mutex> guard(mtx);
+            input.push(ch);
+            if (ch == 'x') {
+							return;
+            }
+          }
+        }
+        int player = reader.read_single<uint32_t>();
+        reader.swap_buffer();
+        printf("ch: %c\n", ch);
+        printf("player: %i\n", player);
+        printf("chi: %i\n", ch);
+      }
+    }
+  }
+}
+
+Server::~Server() {
+  free(pfds);
+  free(pfds_out);
+}
