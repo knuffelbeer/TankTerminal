@@ -2,9 +2,11 @@
 #include "../include/position.h"
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,8 +15,10 @@
 #include <unistd.h>
 
 #include <arpa/inet.h>
+#include <vector>
 
 Reader::Reader() {
+  buffer_dynamic = std::vector<uint32_t>(BUFFERSIZE);
   buffer = (char *)&buffer_data;
   overflow = (char *)&overflow_data;
 }
@@ -26,7 +30,9 @@ int Reader::make_buf(int start, int socket) {
   int num_bytes{start};
   while (num_bytes < sizeof(Message)) {
     int mesg = recv(socket, buffer + num_bytes, BUFFERSIZE - num_bytes, 0);
-    assert(mesg != 0 && "connection closed\n");
+    if (mesg == 0) {
+      throw std::runtime_error("connection closed");
+    }
     assert(mesg > 0 && "error recieving\n");
     num_bytes += mesg;
   }
@@ -45,9 +51,10 @@ int Reader::make_buf(int start, int socket) {
   }
 
   while (num_bytes < m.size) {
-
     int mesg = recv(socket, buffer + num_bytes, BUFFERSIZE - num_bytes, 0);
-    assert(mesg != 0 && "connection closed\n");
+    if (mesg == 0) {
+      throw std::runtime_error("connection closed");
+    }
     assert(mesg > 0 && "error recieving\n");
     num_bytes += mesg;
     if (num_bytes > m.size) {

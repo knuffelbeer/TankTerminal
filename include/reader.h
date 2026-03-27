@@ -23,6 +23,7 @@
 
 class Reader {
   int idx{};
+	std::vector<uint32_t> buffer_dynamic;
   char buffer_data[BUFFERSIZE];
   char *buffer;
   char *overflow;

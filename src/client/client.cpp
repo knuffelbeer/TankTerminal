@@ -9,10 +9,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <ncurses.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <queue>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -184,6 +186,11 @@ void *get_in_addr(struct sockaddr *sa) {
 int main(int argc, char *argv[]) {
   auto client = Client(argc, argv);
   while (1) {
-    client.iteration();
+    try {
+      client.iteration();
+    } catch (std::runtime_error &e) {
+      std::cerr << e.what() << '\n';
+      break;
+    }
   }
 }

@@ -1,8 +1,12 @@
 #include "../../include/server/server.h"
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
+#include <iostream>
 #include <mutex>
+#include <ncurses.h>
 #include <queue>
+#include <stdexcept>
 #include <thread>
 
 int Server::get_listener_socket(void) {
@@ -55,12 +59,8 @@ int Server::get_listener_socket(void) {
 }
 
 void Server::add_to_pfds(int newfd) {
-  // If we don't have room, add more space in the pfds array
-  printf("fd_count %i", fd_count);
-  printf("fd_count %i", fd_size);
   if (fd_count > fd_size) {
     printf("already %i connections", fd_size);
-    throw;
     return;
   }
 
@@ -75,10 +75,6 @@ void Server::add_to_pfds(int newfd) {
   (fd_count_out)++;
 
   if (fd_count == fd_size) {
-    printf("max_number of connections");
-    for (int i = 0; i < fd_size; i++) {
-      fcntl(pfds[i].fd, F_SETFL, O_NONBLOCK);
-    }
     connections_ready = true;
   }
 }
@@ -96,13 +92,11 @@ void Server::handle_new_connection() {
 
   addrlen = sizeof remoteaddr;
   newfd = accept(listener, (struct sockaddr *)&remoteaddr, &addrlen);
-  // fcntl(newfd, F_SETFL, O_NONBLOCK);
 
   if (newfd == -1) {
     perror("accept");
   } else {
     add_to_pfds(newfd);
-
     printf("pollserver: new connection from %s on socket %d\n",
            inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP), newfd);
   }
@@ -177,31 +171,82 @@ void Server::send_data(char *vec, size_t n) {
 }
 
 void Server::recieve_input(std::queue<uint32_t> &input, std::mutex &mtx) {
-  while (1) {
-    int poll_count = poll(pfds, fd_count, -1);
-    for (int j = 1; j < fd_size; j++) {
-      if (pfds[j].revents & POLLHUP || pfds[j].revents & POLLNVAL ||
-          pfds[j].revents & POLLERR)
-        throw;
-      if (pfds[j].revents & (POLLIN)) {
-        reader.make_buf(start, pfds[j].fd);
-        uint32_t ch = reader.read_single<uint32_t>();
-        if (ch > 0) {
-          {
-            std::lock_guard<std::mutex> guard(mtx);
-            input.push(ch);
-            if (ch == 'x') {
-							return;
+  try {
+    while (1) {
+      int poll_count = poll(pfds, fd_count, -1);
+      for (int j = 1; j < fd_size; j++) {
+        if (pfds[j].revents & POLLHUP || pfds[j].revents & POLLNVAL ||
+            pfds[j].revents & POLLERR)
+          throw;
+        if (pfds[j].revents & (POLLIN)) {
+          reader.make_buf(start, pfds[j].fd);
+          uint32_t ch = reader.read_single<uint32_t>();
+          if (ch > 0) {
+            {
+              std::lock_guard<std::mutex> guard(mtx);
+              switch (ch) {
+              case KEY_UP: {
+                if (j == 1) {
+                  input.push(ch);
+                } else {
+                  input.push('w');
+                }
+                break;
+              }
+              case KEY_DOWN: {
+                if (j == 1) {
+                  input.push(ch);
+                } else {
+                  input.push('s');
+                }
+                break;
+              }
+              case KEY_LEFT: {
+                if (j == 1) {
+                  input.push(ch);
+                } else {
+                  input.push('a');
+                }
+                break;
+              }
+              case KEY_RIGHT: {
+                if (j == 1) {
+                  input.push(ch);
+                } else {
+                  input.push('d');
+                }
+                break;
+              }
+              case ' ': {
+                if (j == 1) {
+                  input.push(ch);
+                } else {
+                  input.push('q');
+                }
+                break;
+              }
+              case 'x': {
+                input.push(ch);
+                return;
+              }
+              }
             }
           }
+          int player = reader.read_single<uint32_t>();
+          reader.swap_buffer();
+          printf("ch: %c\n", ch);
+          printf("player: %i\n", player);
+          printf("chi: %i\n", ch);
         }
-        int player = reader.read_single<uint32_t>();
-        reader.swap_buffer();
-        printf("ch: %c\n", ch);
-        printf("player: %i\n", player);
-        printf("chi: %i\n", ch);
       }
     }
+  } catch (std::runtime_error &e) {
+    std::cerr <<"connection closed" << e.what() << '\n';
+    {
+      std::lock_guard<std::mutex> guard(mtx);
+      input.push('x');
+    }
+    return;
   }
 }
 
