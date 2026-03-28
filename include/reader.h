@@ -19,25 +19,16 @@
 
 #define PORT "9034" // the port client will be connecting to
 
-#define BUFFERSIZE 1000
+#define BUFFERSIZE 10
 
 class Reader {
   int idx{};
-	std::vector<uint32_t> buffer_dynamic;
-  char buffer_data[BUFFERSIZE];
-  char *buffer;
-  char *overflow;
-  char overflow_data[BUFFERSIZE];
+  std::vector<char> buffer;
 
 public:
   int length;
   int message_type;
 
-  Reader& operator=(const Reader &other) {
-    buffer = (char *)&buffer_data;
-    overflow = (char *)&overflow_data;
-    return *this;
-  }
 
   Reader();
 
@@ -49,7 +40,7 @@ public:
 
     T result;
     uint32_t *int_members = reinterpret_cast<uint32_t *>(&result);
-    std::memcpy(int_members, buffer + idx, size_T);
+    std::memcpy(int_members, buffer.data() + idx, size_T);
 
     for (int i = 0; i < amt_member_ints; i++) {
       uint32_t *int_member = int_members + i;
@@ -77,6 +68,4 @@ public:
   }
 
   int make_buf(int start, int socket);
-
-  void swap_buffer();
 };

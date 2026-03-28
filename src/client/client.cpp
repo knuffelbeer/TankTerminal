@@ -27,8 +27,6 @@
 
 #define PORT "9034" // the port client will be connecting to
 
-#define BUFFERSIZE 1000
-
 void *get_in_addr(struct sockaddr *sa);
 
 class Client {
@@ -118,6 +116,9 @@ Client::Client(int argc, char *argv[]) {
 }
 
 void Client::iteration() {
+  for (const auto &wall : walls) {
+    game.draw(wall);
+  }
   uint32_t ch = getch();
   if (ch != ERR) {
     auto buffer = Buffer();
@@ -126,7 +127,7 @@ void Client::iteration() {
     buffer.add(m);
     buffer.add((uint32_t)ch);
     buffer.add((uint32_t)0);
-    send(sockfd, &buffer.data, size_m, 0);
+    send(sockfd, buffer.data_dynamic.data(), size_m, 0);
   }
 
   start = reader.make_buf(start, sockfd);
@@ -168,7 +169,6 @@ void Client::iteration() {
     throw;
   }
   }
-  reader.swap_buffer();
   wrefresh(game.my_win);
 }
 

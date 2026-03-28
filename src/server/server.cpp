@@ -233,15 +233,11 @@ void Server::recieve_input(std::queue<uint32_t> &input, std::mutex &mtx) {
             }
           }
           int player = reader.read_single<uint32_t>();
-          reader.swap_buffer();
-          printf("ch: %c\n", ch);
-          printf("player: %i\n", player);
-          printf("chi: %i\n", ch);
         }
       }
     }
   } catch (std::runtime_error &e) {
-    std::cerr <<"connection closed" << e.what() << '\n';
+    std::cerr << "connection closed" << e.what() << '\n';
     {
       std::lock_guard<std::mutex> guard(mtx);
       input.push('x');

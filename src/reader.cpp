@@ -17,57 +17,69 @@
 #include <arpa/inet.h>
 #include <vector>
 
-Reader::Reader() {
-  buffer_dynamic = std::vector<uint32_t>(BUFFERSIZE);
-  buffer = (char *)&buffer_data;
-  overflow = (char *)&overflow_data;
-}
+Reader::Reader() { buffer = std::vector<char>(BUFFERSIZE); }
 
-int Reader::make_buf(int start, int socket) {
-  if (start > BUFFERSIZE) {
-    abort();
+int Reader::make_buf(int bytes_overflow, int socket) {
+  int bytes_message = sizeof(Message);
+  bool mesg_read = false;
+  Message m;
+  if (idx) {
+    if (bytes_overflow >= sizeof(Message)) {
+      m = read_single<Message>();
+      mesg_read = true;
+      length = m.size;
+      message_type = m.type;
+      if (length >= buffer.size()) {
+        buffer.resize(length);
+      }
+      if (bytes_overflow >= length) {
+        return bytes_overflow - length;
+      } else {
+        std::memcpy(buffer.data(), buffer.data() + idx + bytes_message,
+                    bytes_overflow - bytes_message);
+        idx = 0;
+      }
+    } else {
+      std::memcpy(buffer.data(), buffer.data() + idx, bytes_overflow);
+      idx = 0;
+    }
   }
-  int num_bytes{start};
-  while (num_bytes < sizeof(Message)) {
-    int mesg = recv(socket, buffer + num_bytes, BUFFERSIZE - num_bytes, 0);
+
+  while (bytes_overflow < sizeof(Message)) {
+    int mesg = recv(socket, buffer.data() + bytes_overflow,
+                    buffer.size() - bytes_overflow, 0);
     if (mesg == 0) {
       throw std::runtime_error("connection closed");
     }
     assert(mesg > 0 && "error recieving\n");
-    num_bytes += mesg;
-  }
-  idx = 0;
-  Message m = read_single<Message>();
-  length = m.size;
-  message_type = m.type;
-  assert(length <= BUFFERSIZE && "length probably shouldn't exceed BUFFERSIZE");
-
-  if (num_bytes > m.size) {
-    memcpy(overflow, buffer + m.size, num_bytes - m.size);
-    return num_bytes - m.size;
-  }
-  if (num_bytes == m.size) {
-    return 0;
+    bytes_overflow += mesg;
   }
 
-  while (num_bytes < m.size) {
-    int mesg = recv(socket, buffer + num_bytes, BUFFERSIZE - num_bytes, 0);
+  if (!mesg_read) {
+    m = read_single<Message>();
+    length = m.size;
+    message_type = m.type;
+    if (length >= buffer.size()) {
+      buffer.resize(length);
+    }
+    if (bytes_overflow >= m.size) {
+      return bytes_overflow - m.size;
+    }
+  }
+
+  while (bytes_overflow < m.size) {
+    int mesg = recv(socket, buffer.data() + bytes_overflow,
+                    buffer.size() - bytes_overflow, 0);
     if (mesg == 0) {
       throw std::runtime_error("connection closed");
     }
     assert(mesg > 0 && "error recieving\n");
-    num_bytes += mesg;
-    if (num_bytes > m.size) {
-      memcpy(overflow, buffer + m.size, num_bytes - m.size);
-      return num_bytes - m.size;
+    assert(bytes_overflow <= buffer.size() &&
+           "length shouldn't exceed size of dynamic buffer!");
+    bytes_overflow += mesg;
+    if (bytes_overflow > m.size) {
+      return bytes_overflow - m.size;
     }
   }
   return 0;
-}
-
-void Reader::swap_buffer() {
-  char *buf_cpy = buffer;
-  buffer = overflow;
-  overflow = buf_cpy;
-  idx = 0;
 }

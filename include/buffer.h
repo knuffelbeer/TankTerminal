@@ -5,23 +5,27 @@
 #include <cstring>
 #include <stdio.h>
 #include <sys/_endian.h>
+#include <vector>
 
 class Position;
 class WallLayout;
 class TankLayout;
 class Message;
 class Buffer {
-
-  static constexpr size_t MAX_BYTES = 500;
-  int max_bytes{MAX_BYTES};
   int index{};
 
 public:
-  Buffer() {}
-  char data[MAX_BYTES];
+  std::vector<char> data_dynamic;
+
+  Buffer() { data_dynamic = std::vector<char>(50); }
+
   int get_num_bytes() { return index; }
+
   template <typename T> void add(T element) {
-    assert(index + sizeof(T) <= max_bytes && "number of bytes exceeds buffer");
+    if (index + sizeof(T) >= data_dynamic.size()) {
+      data_dynamic.resize(index + sizeof(T));
+    }
+
     assert(sizeof(T) % sizeof(uint32_t) == 0 &&
            "type should be composed of uint32 members.");
 
@@ -32,8 +36,7 @@ public:
       uint32_t *mem_address = int_elem + i;
       *mem_address = htonl(*mem_address);
     }
-
-    std::memcpy(&data[index], int_elem, sizeof(T));
+    std::memcpy(data_dynamic.data() + index, int_elem, sizeof(T));
     index += sizeof(T);
   }
 };

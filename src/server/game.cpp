@@ -196,7 +196,8 @@ void Game::iteration(Server *server) {
       for (Wall w : walls) {
         wall_buffer.add(w);
       }
-      server->send_data(wall_buffer.data, wall_buffer.get_num_bytes());
+      server->send_data(wall_buffer.data_dynamic.data(),
+                        wall_buffer.get_num_bytes());
       walls_drawn = true;
     }
 
@@ -243,7 +244,7 @@ void Game::iteration(Server *server) {
              size_msg, buf.get_num_bytes());
     }
     update_bullets();
-    server->send_data(buf.data, buf.get_num_bytes());
+    server->send_data(buf.data_dynamic.data(), buf.get_num_bytes());
     wrefresh(my_win);
     usleep(DELTA_MS);
   }
