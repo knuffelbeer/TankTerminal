@@ -1,14 +1,17 @@
 #include "../../include/reader.h"
 #include <arpa/inet.h>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <fcntl.h>
 #include <mutex>
+#include <ncurses.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <queue>
+#include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,26 +20,49 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 #define PORT "9034" // Port we're listening on
 
+namespace ServerConstants {
+enum {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  SPACE,
+};
+
+constexpr std::array<std::array<uint32_t, 2>, 6> player_mappings = {
+    {{KEY_UP, 'w'},
+     {KEY_DOWN, 's'},
+     {KEY_RIGHT, 'd'},
+     {KEY_LEFT, 'a'},
+     {' ', 'q'},
+     {'x', 'x'}}};
+
+inline int get(uint32_t key, int player) {
+  for (const auto &e : player_mappings) {
+    if (e[0] == key) {
+      return e[player];
+    }
+  }
+  return -1;
+}
+
+} // namespace ServerConstants
 class Server {
   int listener;
-
-  Reader reader = Reader();
-  int start{};
-  int fd_size = 3;
-  int fd_size_out = 2;
-  int fd_count = 0;
-  struct pollfd *pfds;
-  int fd_count_out = 0;
-  struct pollfd *pfds_out;
-
+  pollfd listenerfd;
+  std::vector<std::tuple<Reader, int>> pfd_data;
+  std::vector<pollfd> pfds_in;
+  std::vector<pollfd> pfds_out;
+  void process(int type);
   int get_listener_socket(void);
   void add_to_pfds(int newfd);
   void del_from_pfds(int i);
   void handle_new_connection();
-  void check_new_connections(int *fd_count, struct pollfd **pfds);
+  void check_new_connections();
 
 public:
   void send_data(char *vec, size_t n);

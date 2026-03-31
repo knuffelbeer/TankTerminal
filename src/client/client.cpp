@@ -13,11 +13,13 @@
 #include <ncurses.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <queue>
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -35,7 +37,7 @@ class Client {
   Reader reader = Reader();
   int rv;
   char s[INET6_ADDRSTRLEN];
-  int start = 0;
+  int overflow = 0;
   size_t num_tank_bytes = sizeof(TankLayout) * 2;
   size_t num_message_bytes = sizeof(Message);
   std::vector<Position> positions;
@@ -113,61 +115,90 @@ Client::Client(int argc, char *argv[]) {
   freeaddrinfo(servinfo); // all done with this structure
   nodelay(stdscr, TRUE);
   game = Game(40, 30);
+  int flags = fcntl(sockfd, F_GETFL, 0);
+  fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+  int flag = 1;
+  setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(flag));
 }
 
 void Client::iteration() {
   for (const auto &wall : walls) {
     game.draw(wall);
   }
-  uint32_t ch = getch();
+  Message m;
+  reader.make_buf(overflow, sockfd);
+  while (true) {
+    if (overflow < sizeof(Message)) {
+      break;
+    }
+
+    int overflow_copy = overflow;
+    Message peek_message = reader.peek_single<Message>(overflow_copy);
+    if (overflow_copy < peek_message.size)
+      break;
+
+    m = reader.read_single<Message>(overflow);
+
+    switch (m.type) {
+    case 0: {
+
+      assert((m.size - num_tank_bytes - num_message_bytes) % sizeof(Position) ==
+                 0 &&
+             "not an interger number of positions\n");
+
+      game.remove(positions);
+      game.remove(tanks);
+
+      tanks = reader.read<TankLayout, 2>(overflow);
+      auto num_positions =
+          (m.size - num_tank_bytes - num_message_bytes) / sizeof(Position);
+
+      positions = reader.read<Position>(num_positions, overflow);
+
+      game.draw(positions);
+      game.draw(tanks);
+      break;
+    }
+    case 1: {
+      assert((m.size - num_message_bytes) % sizeof(WallLayout) == 0 &&
+             "not integer number of walls!");
+
+      game.remove(walls);
+
+      auto num_walls = (m.size - num_message_bytes) / sizeof(WallLayout);
+      walls = reader.read<WallLayout>(num_walls, overflow);
+
+      game.draw(walls);
+      break;
+    }
+    default: {
+      printf("message not valid! message: %i %i", m.size, m.type);
+      throw;
+    }
+    }
+  }
+  int ch = getch();
   if (ch != ERR) {
     auto buffer = Buffer();
     auto size_m = 2 * sizeof(uint32_t) + sizeof(Message);
     auto m = Message{static_cast<uint32_t>(size_m), 3};
     buffer.add(m);
-    buffer.add((uint32_t)ch);
+    buffer.add(static_cast<uint32_t>(ch));
     buffer.add((uint32_t)0);
-    send(sockfd, buffer.data_dynamic.data(), size_m, 0);
-  }
-
-  start = reader.make_buf(start, sockfd);
-  switch (reader.message_type) {
-  case 0: {
-
-    assert((reader.length - num_tank_bytes - num_message_bytes) %
-                   sizeof(Position) ==
-               0 &&
-           "not an interger number of positions\n");
-
-    game.remove(positions);
-    game.remove(tanks);
-
-    tanks = reader.read<TankLayout, 2>();
-    auto num_positions =
-        (reader.length - num_tank_bytes - num_message_bytes) / sizeof(Position);
-    positions = reader.read<Position>(num_positions);
-
-    game.draw(positions);
-    game.draw(tanks);
-    break;
-  }
-  case 1: {
-    assert((reader.length - num_message_bytes) % sizeof(WallLayout) == 0 &&
-           "not integer number of walls!");
-
-    game.remove(walls);
-
-    auto num_walls = (reader.length - num_message_bytes) / sizeof(WallLayout);
-    walls = reader.read<WallLayout>(num_walls);
-
-    game.draw(walls);
-    break;
-  }
-  default: {
-    printf("message not valid! message: %i %i", reader.length,
-           reader.message_type);
-    throw;
-  }
+    int sent_bytes_tot{0};
+    while (sent_bytes_tot < size_m) {
+      int sent_bytes = send(sockfd, buffer.data_dynamic.data() + sent_bytes_tot,
+                            size_m - sent_bytes_tot, 0);
+      if (sent_bytes == 0) {
+        throw std::runtime_error("no bytes sent");
+      }
+      if (sent_bytes < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+          continue;
+        throw std::runtime_error("error sending");
+      }
+      sent_bytes_tot += sent_bytes;
+    }
   }
   wrefresh(game.my_win);
 }

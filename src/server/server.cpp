@@ -1,4 +1,6 @@
 #include "../../include/server/server.h"
+#include "../../include/position.h"
+#include <array>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -7,7 +9,9 @@
 #include <ncurses.h>
 #include <queue>
 #include <stdexcept>
+#include <sys/fcntl.h>
 #include <thread>
+#include <vector>
 
 int Server::get_listener_socket(void) {
   int listener; // Listening socket descriptor
@@ -59,29 +63,28 @@ int Server::get_listener_socket(void) {
 }
 
 void Server::add_to_pfds(int newfd) {
-  if (fd_count > fd_size) {
-    printf("already %i connections", fd_size);
+  if (pfds_in.size() >= 2) {
+    printf("already %i connections", static_cast<int>(pfds_in.size()));
     return;
   }
 
-  (pfds)[fd_count].fd = newfd;
-  (pfds)[fd_count].events = POLLIN; // Check ready-to-read
-  (pfds)[fd_count].revents = 0;
-  (fd_count)++;
+  pfds_in.emplace_back(newfd, POLLIN, 0);
+  pfds_out.emplace_back(newfd, POLLOUT, 0);
 
-  (pfds_out)[fd_count_out].fd = newfd;
-  (pfds_out)[fd_count_out].events = POLLOUT; // Check_ready-to-write
-  (pfds_out)[fd_count_out].revents = 0;
-  (fd_count_out)++;
-
-  if (fd_count == fd_size) {
+  if (pfds_in.size() == 2) {
     connections_ready = true;
+    for (auto &pfd : pfds_in) {
+
+      int sockfd = pfd.fd;
+      int flags = fcntl(sockfd, F_GETFL, 0);
+      fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+    }
   }
 }
 
 void Server::del_from_pfds(int i) {
-  pfds[i] = pfds[fd_count - 1];
-  fd_count--;
+  pfds_in.erase(pfds_in.begin() + i);
+  pfds_out.erase(pfds_out.begin() + 1);
 }
 
 void Server::handle_new_connection() {
@@ -102,64 +105,56 @@ void Server::handle_new_connection() {
   }
 }
 
-void Server::check_new_connections(int *fd_count, struct pollfd **pfds) {
-  for (int i = 0; i < *fd_count; i++) {
-    if ((*pfds)[i].revents & (POLLIN)) {
-      if ((*pfds)[i].fd == listener) {
-        handle_new_connection();
-      }
-    }
+void Server::check_new_connections() {
+  if (listenerfd.revents & POLLIN) {
+    handle_new_connection();
   }
 }
 
 Server::Server() {
-  pfds = static_cast<pollfd *>(malloc(sizeof *pfds * fd_size));
-  pfds_out = static_cast<pollfd *>(malloc(sizeof *pfds_out * fd_size_out));
+  pfds_in.reserve(2);
+  pfds_out.reserve(2);
   // Set up and get a listening socket
   listener = get_listener_socket();
-  // fcntl(listener, F_SETFL, O_NONBLOCK);
 
   if (listener == -1) {
     fprintf(stderr, "error getting listening socket\n");
     exit(1);
   }
 
-  // Add the listener to set;
-  // Report ready to read on incoming connection
-  pfds[0].fd = listener;
-  pfds[0].events = POLLIN;
-
-  fd_count = 1; // For the listener
+  listenerfd.fd = listener;
+  listenerfd.events = POLLIN;
 
   puts("pollserver: waiting for connections...");
+  pfd_data = {{Reader(), 0}, {Reader(), 0}};
 }
 
 void Server::listen_for_connections() {
-  if ((fd_count == fd_size) || connections_ready) {
+  if ((pfds_in.size() == 2) || connections_ready) {
     printf("already enough connections");
     throw;
   }
 
-  int poll_count = poll(pfds, fd_count, -1);
+  int poll_count = poll(&listenerfd, 1, -1);
   if (poll_count == -1) {
     perror("poll");
     exit(1);
   }
   printf("waiting for players");
-  check_new_connections(&fd_count, &pfds);
+  check_new_connections();
   return;
 }
 
 void Server::send_data(char *vec, size_t n) {
-  int poll_count_out = poll(pfds_out, fd_count_out, 0);
-  for (int j = 0; j < fd_size_out; j++) {
-    if (pfds_out[j].revents & POLLHUP || pfds_out[j].revents & POLLNVAL ||
-        pfds_out[j].revents & POLLERR)
+  int poll_count_out = poll(pfds_out.data(), pfds_out.size(), 0);
+  for (const auto &pfd : pfds_out) {
+    if (pfd.revents & POLLHUP || pfd.revents & POLLNVAL ||
+        pfd.revents & POLLERR)
       throw;
-    if (pfds_out[j].revents & POLLOUT) {
+    if (pfd.revents & POLLOUT) {
       int total_bytes_sent{};
       while (total_bytes_sent < n) {
-        int bytes_sent = send(pfds_out[j].fd, vec, n, 0);
+        int bytes_sent = send(pfd.fd, vec, n, 0);
         if (bytes_sent < 0) {
           printf("error while sending");
           throw;
@@ -173,67 +168,44 @@ void Server::send_data(char *vec, size_t n) {
 void Server::recieve_input(std::queue<uint32_t> &input, std::mutex &mtx) {
   try {
     while (1) {
-      int poll_count = poll(pfds, fd_count, -1);
-      for (int j = 1; j < fd_size; j++) {
-        if (pfds[j].revents & POLLHUP || pfds[j].revents & POLLNVAL ||
-            pfds[j].revents & POLLERR)
+      int poll_count = poll(pfds_in.data(), pfds_in.size(), -1);
+      for (int player = 0; const auto &pfd : pfds_in) {
+        auto &[reader, overflow_size] = pfd_data[player];
+
+        if (pfd.revents & POLLHUP || pfd.revents & POLLNVAL ||
+            pfd.revents & POLLERR)
           throw;
-        if (pfds[j].revents & (POLLIN)) {
-          reader.make_buf(start, pfds[j].fd);
-          uint32_t ch = reader.read_single<uint32_t>();
-          if (ch > 0) {
-            {
-              std::lock_guard<std::mutex> guard(mtx);
-              switch (ch) {
-              case KEY_UP: {
-                if (j == 1) {
-                  input.push(ch);
-                } else {
-                  input.push('w');
-                }
-                break;
-              }
-              case KEY_DOWN: {
-                if (j == 1) {
-                  input.push(ch);
-                } else {
-                  input.push('s');
-                }
-                break;
-              }
-              case KEY_LEFT: {
-                if (j == 1) {
-                  input.push(ch);
-                } else {
-                  input.push('a');
-                }
-                break;
-              }
-              case KEY_RIGHT: {
-                if (j == 1) {
-                  input.push(ch);
-                } else {
-                  input.push('d');
-                }
-                break;
-              }
-              case ' ': {
-                if (j == 1) {
-                  input.push(ch);
-                } else {
-                  input.push('q');
-                }
-                break;
-              }
-              case 'x': {
-                input.push(ch);
-                return;
-              }
-              }
-            }
-          }
-          int player = reader.read_single<uint32_t>();
+
+        if (!(pfd.revents & (POLLIN))) {
+          player++;
+          continue;
         }
+
+        Message m;
+        while (true) {
+          reader.make_buf(overflow_size, pfd.fd);
+          if (overflow_size < sizeof(Message))
+            break;
+          int overflow_size_copy = overflow_size;
+
+          Message peek_m = reader.peek_single<Message>(overflow_size_copy);
+
+          if (overflow_size < peek_m.size)
+            break;
+
+          m = reader.read_single<Message>(overflow_size);
+          uint32_t ch = reader.read_single<uint32_t>(overflow_size);
+          reader.read_single<uint32_t>(overflow_size);
+
+          int key = ServerConstants::get(ch, player);
+          if (key != -1) {
+            std::lock_guard<std::mutex> guard(mtx);
+            input.push(key);
+            if (key == 'x')
+              throw std::runtime_error("player disconnected");
+          }
+        }
+        player++;
       }
     }
   } catch (std::runtime_error &e) {
@@ -246,7 +218,4 @@ void Server::recieve_input(std::queue<uint32_t> &input, std::mutex &mtx) {
   }
 }
 
-Server::~Server() {
-  free(pfds);
-  free(pfds_out);
-}
+Server::~Server() {}

@@ -17,7 +17,7 @@ class Buffer {
 public:
   std::vector<char> data_dynamic;
 
-  Buffer() { data_dynamic = std::vector<char>(50); }
+  Buffer() { data_dynamic = std::vector<char>(1000); }
 
   int get_num_bytes() { return index; }
 

@@ -1,6 +1,7 @@
 #include "../include/reader.h"
 #include "../include/position.h"
 #include <cassert>
+#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -19,67 +20,28 @@
 
 Reader::Reader() { buffer = std::vector<char>(BUFFERSIZE); }
 
-int Reader::make_buf(int bytes_overflow, int socket) {
-  int bytes_message = sizeof(Message);
-  bool mesg_read = false;
-  Message m;
+void Reader::make_buf(int &bytes_overflow, int socket) {
   if (idx) {
-    if (bytes_overflow >= sizeof(Message)) {
-      m = read_single<Message>();
-      mesg_read = true;
-      length = m.size;
-      message_type = m.type;
-      if (length >= buffer.size()) {
-        buffer.resize(length);
-      }
-      if (bytes_overflow >= length) {
-        return bytes_overflow - length;
-      } else {
-        std::memcpy(buffer.data(), buffer.data() + idx + bytes_message,
-                    bytes_overflow - bytes_message);
-        idx = 0;
-      }
-    } else {
-      std::memcpy(buffer.data(), buffer.data() + idx, bytes_overflow);
-      idx = 0;
-    }
+    std::memmove(buffer.data(), buffer.data() + idx, bytes_overflow);
+    idx = 0;
   }
-
-  while (bytes_overflow < sizeof(Message)) {
-    int mesg = recv(socket, buffer.data() + bytes_overflow,
+  while (1) {
+    if (bytes_overflow == buffer.size()) {
+      buffer.resize(2 * buffer.size());
+    }
+    int mesg =  recv(socket, buffer.data() + bytes_overflow,
                     buffer.size() - bytes_overflow, 0);
+    if (mesg > 0) {
+      bytes_overflow += mesg;
+    }
     if (mesg == 0) {
-      throw std::runtime_error("connection closed");
+      throw std::runtime_error("client disconnected");
     }
-    assert(mesg > 0 && "error recieving\n");
-    bytes_overflow += mesg;
-  }
-
-  if (!mesg_read) {
-    m = read_single<Message>();
-    length = m.size;
-    message_type = m.type;
-    if (length >= buffer.size()) {
-      buffer.resize(length);
+    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      break;
     }
-    if (bytes_overflow >= m.size) {
-      return bytes_overflow - m.size;
+    if (mesg < 0) {
+      throw std::runtime_error("client disconnected");
     }
   }
-
-  while (bytes_overflow < m.size) {
-    int mesg = recv(socket, buffer.data() + bytes_overflow,
-                    buffer.size() - bytes_overflow, 0);
-    if (mesg == 0) {
-      throw std::runtime_error("connection closed");
-    }
-    assert(mesg > 0 && "error recieving\n");
-    assert(bytes_overflow <= buffer.size() &&
-           "length shouldn't exceed size of dynamic buffer!");
-    bytes_overflow += mesg;
-    if (bytes_overflow > m.size) {
-      return bytes_overflow - m.size;
-    }
-  }
-  return 0;
 }
