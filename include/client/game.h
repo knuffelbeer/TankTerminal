@@ -32,6 +32,7 @@ public:
   void remove(const Position &el);
   void draw(const Position &el);
   void draw(const WallLayout &wall);
+  void draw(const AnimationPos &pos, const std::array<TankLayout, 2> &tanks);
 
   template <std::ranges::range T> void remove(const T &elements) {
     static_assert(!std::same_as<TankLayout, T>,

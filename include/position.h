@@ -10,7 +10,7 @@ enum {
   ZAP_PIXEL_TYPE,
   ZAP_AIM_PIXEL_TYPE,
   ZAP_SPRITE_TYPE,
-	NUM_ELEMENT_TYPES
+  NUM_ELEMENT_TYPES
 };
 
 #pragma pack(push, 1)
@@ -39,6 +39,10 @@ struct WallLayout {
   uint32_t loc;
   uint32_t start;
   uint32_t stop;
+};
+
+struct AnimationPos {
+  uint32_t player;
 };
 
 #pragma pack(pop)

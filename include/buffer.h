@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <stdio.h>
-#include <sys/_endian.h>
+#include <arpa/inet.h>
 #include <vector>
 
 class Position;
