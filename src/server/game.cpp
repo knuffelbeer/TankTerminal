@@ -7,6 +7,7 @@
 #include "../../include/server/wall.h"
 #include <cassert>
 #include <concepts>
+#include <cstdint>
 #include <functional>
 #include <mutex>
 #include <ncurses.h>
@@ -219,9 +220,11 @@ void Game::iteration(Server *server) {
           el);
     }
     buf.add(Message{size_msg, 0});
-    for (const auto &tank : tanks) {
+
+    for (int player = 0; const auto &tank : tanks) {
       buf.add((TankLayout)tank);
     }
+
     for (int i = 0; const auto &el : elements) {
       std::visit(
           [&buf, &i, &size_msg](const auto &obj) {
@@ -243,7 +246,21 @@ void Game::iteration(Server *server) {
       printf("message size is corrupt! size_msg: %i, get_num_bytes(): %i",
              size_msg, buf.get_num_bytes());
     }
+
     update_bullets();
+
+    int exploded_player = -1;
+    for (int i = 0; const auto &tank : tanks) {
+      if (tank.exploded)
+        exploded_player = i;
+      i++;
+    }
+
+    if (exploded_player != -1) {
+      buf.add(Message{sizeof(Message) + sizeof(AnimationPos), 5});
+      buf.add(AnimationPos{static_cast<uint32_t>(exploded_player)});
+    }
+
     server->send_data(buf.data_dynamic.data(), buf.get_num_bytes());
     wrefresh(my_win);
     usleep(DELTA_MS);

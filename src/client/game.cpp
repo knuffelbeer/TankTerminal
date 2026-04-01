@@ -3,6 +3,7 @@
 #include "../../include/tank_constants.h"
 #include <array>
 #include <ncurses.h>
+#include <unistd.h>
 
 Game::Game() : Window(0, 0) {}
 Game::Game(int width, int height) : Window(width, height) {}
@@ -25,6 +26,44 @@ void Game::draw(const WallLayout &wall, int color) {
   if (wall.direction == 'V')
     mvwvline(my_win, wall.start, wall.loc, '|', wall.stop - wall.start);
   wattroff(my_win, COLOR_PAIR(color));
+}
+
+void Game::draw(const AnimationPos &pos,
+                const std::array<TankLayout, 2> &tanks) {
+  wattron(my_win, COLOR_PAIR(BLACK_BLACK));
+  const TankLayout &tank = tanks[pos.player];
+  for (const auto &[dx, dy] : TankConstants::IMAGE_OFFSETS[tank.orientation]) {
+    mvwaddch(my_win, tank.y + dy, tank.x + dx, ' ');
+  }
+  wattroff(my_win, COLOR_PAIR(BLACK_BLACK));
+
+  constexpr int amt_explosion_colors = 3;
+  int colors[amt_explosion_colors];
+  colors[0] = tank.color_pair;
+  colors[1] = GREEN_YELLOW;
+  colors[2] = BLACK_ORANGE;
+
+  for (int i = 0; i < 6; i++) {
+    for (int j = 0; j < amt_explosion_colors; j++) {
+
+      int radius = i - j;
+
+      if (radius < 0)
+        continue;
+
+      wattron(my_win, COLOR_PAIR(colors[j]));
+
+      for (const auto &[dx, dy] :
+           TankConstants::IMAGE_OFFSETS[tank.orientation]) {
+        mvwaddch(my_win, tank.y + radius * dy - radius / 2,
+                 tank.x + radius * dx - radius / 2, ' ');
+      }
+      wattroff(my_win, COLOR_PAIR(colors[j]));
+    }
+    wrefresh(my_win);
+    usleep(120000);
+  }
+  wclear(my_win);
 }
 
 void Game::remove(const Position &el) { mvwaddch(my_win, el.y, el.x, ' '); }

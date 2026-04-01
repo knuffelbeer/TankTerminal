@@ -2,7 +2,7 @@
 #include "../../include/client/game.h"
 #include "../../include/position.h"
 #include "../../include/reader.h"
-#include <_stdio.h>
+#include <stdio.h>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -170,6 +170,13 @@ void Client::iteration() {
 
       game.draw(walls);
       break;
+    }
+    case 5: {
+      assert((m.size - num_message_bytes) % sizeof(AnimationPos) == 0 &&
+             "not integer number of Animantions!");
+      AnimationPos animation = reader.read_single<AnimationPos>(overflow);
+      game.draw(animation, tanks);
+			break;
     }
     default: {
       printf("message not valid! message: %i %i", m.size, m.type);
